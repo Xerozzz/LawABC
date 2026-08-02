@@ -1,31 +1,37 @@
-import { useEffect, useState } from "react";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./AuthContext.jsx";
+import Layout from "./components/Layout.jsx";
+import AuthScreen from "./screens/AuthScreen.jsx";
+import Onboarding from "./screens/Onboarding.jsx";
+import Home from "./screens/Home.jsx";
+import Timeline from "./screens/Timeline.jsx";
+import Savings from "./screens/Savings.jsx";
+import CravingSOS from "./screens/CravingSOS.jsx";
+import Community from "./screens/Community.jsx";
+import Profile from "./screens/Profile.jsx";
 
 export default function App() {
-  const [health, setHealth] = useState("checking...");
-  const [dbTime, setDbTime] = useState(null);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/health`)
-      .then((res) => res.json())
-      .then((data) => setHealth(data.status))
-      .catch(() => setHealth("unreachable"));
+  if (loading) {
+    return <div className="center-screen muted">Loading ClearAir…</div>;
+  }
 
-    fetch(`${API_URL}/api/db-time`)
-      .then((res) => res.json())
-      .then((data) => setDbTime(data.now))
-      .catch(() => setDbTime("error"));
-  }, []);
+  if (!user) return <AuthScreen />;
+
+  if (!user.onboarded) return <Onboarding />;
 
   return (
-    <main style={{ fontFamily: "system-ui, sans-serif", padding: "2rem", maxWidth: 640, margin: "0 auto" }}>
-      <h1>LawABC</h1>
-      <p>Skeleton full-stack app.</p>
-      <ul>
-        <li>Backend health: <strong>{health}</strong></li>
-        <li>Database time: <strong>{dbTime ?? "loading..."}</strong></li>
-      </ul>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/timeline" element={<Timeline />} />
+        <Route path="/savings" element={<Savings />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/profile" element={<Profile />} />
+      </Route>
+      <Route path="/sos" element={<CravingSOS />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

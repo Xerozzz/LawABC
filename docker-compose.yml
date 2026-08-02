@@ -8,10 +8,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lawabc_password}
       POSTGRES_DB: ${POSTGRES_DB:-lawabc}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lawabc} -d ${POSTGRES_DB:-lawabc}"]
       interval: 5s
@@ -26,9 +25,10 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4000
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       DATABASE_URL: postgres://${POSTGRES_USER:-lawabc}:${POSTGRES_PASSWORD:-lawabc_password}@db:5432/${POSTGRES_DB:-lawabc}
     ports:
-      - "4000:4000"
+      - "${BACKEND_PORT:-4000}:4000"
     depends_on:
       db:
         condition: service_healthy
@@ -42,9 +42,9 @@ services:
     container_name: lawabc-frontend
     restart: unless-stopped
     environment:
-      VITE_API_URL: http://localhost:4000
+      VITE_API_URL: http://localhost:${BACKEND_PORT:-4000}
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
       - backend
     volumes:

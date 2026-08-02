@@ -1,22 +1,31 @@
-# LawABC
+# ClearAir (LawABC)
 
-Skeleton full-stack app: **React** (Vite) frontend, **Express** backend, **PostgreSQL** database, wired together with **Docker Compose**.
+An interactive, always-on app that supports youths in quitting vaping. Base version:
+**React** (Vite) frontend, **Express** backend, **PostgreSQL**, wired with **Docker Compose**.
+
+See [TASKS.md](TASKS.md) for the full feature roadmap and the two-developer split.
 
 ## Structure
 
 ```
 LawABC/
-├── docker-compose.yml       # Orchestrates all three services
-├── .env.example             # Postgres credentials (copy to .env)
-├── frontend/                # React + Vite
-│   ├── src/App.jsx          # Calls the backend
-│   └── Dockerfile
-├── backend/                 # Express + pg
-│   ├── src/index.js         # API routes
-│   ├── src/db.js            # Postgres pool
-│   └── Dockerfile
-└── db/
-    └── init/01_init.sql     # Runs on first DB startup
+├── docker-compose.yml            # Orchestrates db + backend + frontend
+├── .env.example                  # Credentials + host ports (copy to .env)
+├── frontend/                     # React + Vite
+│   └── src/
+│       ├── AuthContext.jsx       # Token auth state
+│       ├── api.js                # API client
+│       ├── theme.css             # Youth-centric theme
+│       ├── components/           # Layout, SOS tools (breathing/game/story)
+│       └── screens/              # Auth, Onboarding, Home, Timeline, Savings, SOS, Community, Profile
+└── backend/                      # Express + pg
+    └── src/
+        ├── index.js              # App entry, route mounting
+        ├── db.js                 # Pool + idempotent schema/seed on startup
+        ├── schema.sql            # Tables
+        ├── milestones.seed.js    # Health-recovery milestones (smoking placeholder — see TASKS.md E7)
+        ├── auth.js               # JWT sign + requireAuth middleware
+        └── routes/               # auth, profile, milestones, savings, cravings, reflections
 ```
 
 ## Run everything with Docker
@@ -29,10 +38,19 @@ Then open:
 
 - Frontend: http://localhost:5173
 - Backend health: http://localhost:4000/api/health
-- Backend DB check: http://localhost:4000/api/db-time
 - Postgres: localhost:5432 (user/pass/db default to `lawabc`)
 
-Stop with `Ctrl+C`, and `docker compose down` to remove containers (add `-v` to also wipe the database volume).
+Stop with `Ctrl+C`; `docker compose down` removes containers (add `-v` to also wipe the DB volume).
+
+### Port already in use?
+
+The host ports are configurable so ClearAir can run alongside other projects. Copy `.env.example`
+to `.env` and change any of `BACKEND_PORT`, `FRONTEND_PORT`, `DB_PORT` — the frontend automatically
+points at whatever `BACKEND_PORT` you choose. One-off example:
+
+```bash
+BACKEND_PORT=4100 FRONTEND_PORT=5174 docker compose up
+```
 
 ## Run services individually (without Docker)
 
@@ -50,9 +68,30 @@ npm install
 npm run dev
 ```
 
-## Endpoints
+## Features in this base version
 
-| Method | Path            | Description                     |
-|--------|-----------------|---------------------------------|
-| GET    | `/api/health`   | Liveness check                  |
-| GET    | `/api/db-time`  | Returns `NOW()` from Postgres   |
+- **Auth & onboarding** — sign up, set quit date, weekly spend, and a savings goal
+- **Health Recovery Timeline** — milestone progress driven by a researched dataset (currently a labelled smoking placeholder pending vaping data)
+- **Savings Tracker** — real-time savings since quitting + goal progress
+- **Craving SOS** — 60-second breathing exercise, tap mini-game, or motivational story, then logs the outcome (with optional location)
+- **Anonymous Peer Support** — post/read reflections; author identity is never exposed; basic report-to-hide moderation
+
+## API endpoints
+
+| Method | Path                        | Auth | Description                          |
+|--------|-----------------------------|------|--------------------------------------|
+| GET    | `/api/health`               | no   | Liveness check                       |
+| POST   | `/api/auth/register`        | no   | Create account → `{ token, user }`   |
+| POST   | `/api/auth/login`           | no   | Log in → `{ token, user }`           |
+| GET    | `/api/profile`              | yes  | Current user profile                 |
+| PUT    | `/api/profile`              | yes  | Update profile / complete onboarding |
+| GET    | `/api/milestones`           | yes  | Timeline with per-user progress      |
+| GET    | `/api/savings`              | yes  | Savings + goal progress              |
+| POST   | `/api/cravings`             | yes  | Log a craving event                  |
+| GET    | `/api/cravings`             | yes  | Craving history                      |
+| GET    | `/api/cravings/stats`       | yes  | Totals for dashboard                 |
+| GET    | `/api/reflections`          | yes  | Anonymous reflection feed            |
+| POST   | `/api/reflections`          | yes  | Post an anonymous reflection         |
+| POST   | `/api/reflections/:id/report` | yes | Report → hide a reflection          |
+
+Authenticated requests send `Authorization: Bearer <token>`.

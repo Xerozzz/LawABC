@@ -1,7 +1,7 @@
 {
   "name": "lawabc-backend",
   "version": "0.1.0",
-  "description": "LawABC Express backend",
+  "description": "ClearAir (LawABC) Express backend",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
@@ -9,8 +9,10 @@
     "dev": "node --watch src/index.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0"
   }
 }
