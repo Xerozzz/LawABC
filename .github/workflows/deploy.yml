@@ -52,6 +52,7 @@ jobs:
             --comment "CI deploy ${GITHUB_SHA::7}" \
             --parameters '{"commands":[
               "set -euo pipefail",
+              "export HOME=/root",
               "git config --global --add safe.directory /opt/clearair",
               "cd /opt/clearair",
               "git fetch --all --prune",
