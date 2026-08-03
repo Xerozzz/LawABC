@@ -57,7 +57,12 @@ jobs:
               "git fetch --all --prune",
               "git reset --hard origin/main",
               "docker compose -f docker-compose.prod.yml up -d --build",
-              "docker image prune -f"
+              "docker image prune -f",
+              "echo Waiting for /api/health ...",
+              "ok=0",
+              "for i in $(seq 1 30); do if curl -fsS http://localhost/api/health >/dev/null 2>&1; then ok=1; break; fi; sleep 2; done",
+              "if [ \"$ok\" != 1 ]; then echo HEALTH_CHECK_FAILED; docker compose -f docker-compose.prod.yml logs --tail=60 app; exit 1; fi",
+              "echo DEPLOY_HEALTHY"
             ]}' \
             --query "Command.CommandId" --output text)
           echo "cmd=$CMD" >> "$GITHUB_OUTPUT"
