@@ -1,0 +1,11 @@
+# Normalize line endings. Files that run on the Linux server MUST stay LF —
+# CRLF would break the shebang / commands in the bootstrap script and Caddyfile.
+* text=auto
+
+*.sh        text eol=lf
+*.tftpl     text eol=lf
+Caddyfile   text eol=lf
+Dockerfile  text eol=lf
+Dockerfile.* text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
