@@ -109,6 +109,28 @@ a { color: var(--brand); }
   justify-content: center; padding: 1.5rem; max-width: 420px; margin: 0 auto;
 }
 
+/* Top bar */
+.topbar {
+  position: sticky; top: 0; z-index: 15;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 1.1rem;
+  background: rgba(15, 23, 32, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar .brand { font-weight: 800; }
+.topbar .bell {
+  position: relative; background: transparent; padding: 0.3rem 0.4rem;
+  font-size: 1.3rem; color: var(--text);
+}
+.bell-badge {
+  position: absolute; top: -2px; right: -4px;
+  background: var(--danger); color: #fff;
+  font-size: 0.62rem; font-weight: 800;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 999px; display: flex; align-items: center; justify-content: center;
+}
+
 /* Bottom navigation */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;

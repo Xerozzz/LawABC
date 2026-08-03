@@ -1,17 +1,36 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { api } from "../api.js";
 
 const tabs = [
   { to: "/", icon: "🏠", label: "Home", end: true },
   { to: "/timeline", icon: "❤️", label: "Health" },
   { to: "/savings", icon: "💰", label: "Savings" },
+  { to: "/triggers", icon: "📍", label: "Map" },
   { to: "/community", icon: "💬", label: "Community" },
   { to: "/profile", icon: "👤", label: "Profile" },
 ];
 
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [unread, setUnread] = useState(0);
+
+  // Refresh the unread badge on every navigation (cheap, keeps it current).
+  useEffect(() => {
+    api.getNotifications().then((d) => setUnread(d.unread)).catch(() => {});
+  }, [location.pathname]);
+
   return (
     <>
+      <header className="topbar">
+        <span className="brand">🌬️ ClearAir</span>
+        <button className="bell" onClick={() => navigate("/notifications")} aria-label="Notifications">
+          🔔
+          {unread > 0 && <span className="bell-badge">{unread > 9 ? "9+" : unread}</span>}
+        </button>
+      </header>
+
       <div className="container">
         <Outlet />
       </div>

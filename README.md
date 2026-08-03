@@ -71,10 +71,13 @@ npm run dev
 ## Features in this base version
 
 - **Auth & onboarding** — sign up, set quit date, weekly spend, and a savings goal
-- **Health Recovery Timeline** — milestone progress driven by a researched dataset (currently a labelled smoking placeholder pending vaping data)
+- **Health Recovery Timeline** — milestone progress from a researched, cited **vaping-specific** dataset (`milestones.seed.js`); items extrapolated from smoking data are flagged as inferred
 - **Savings Tracker** — real-time savings since quitting + goal progress
 - **Craving SOS** — 60-second breathing exercise, tap mini-game, or motivational story, then logs the outcome (with optional location)
+- **Trigger Map** — Leaflet map of where cravings happened + a proximity warning near past trigger spots
 - **Anonymous Peer Support** — post/read reflections; author identity is never exposed; basic report-to-hide moderation
+- **Notifications** — milestone / streak / savings-goal celebrations, in-app feed + bell badge, optional device notifications
+- **Privacy & data** — view/delete location history, export all data as JSON, delete account (cascades all data)
 
 ## API endpoints
 
@@ -85,11 +88,17 @@ npm run dev
 | POST   | `/api/auth/login`           | no   | Log in → `{ token, user }`           |
 | GET    | `/api/profile`              | yes  | Current user profile                 |
 | PUT    | `/api/profile`              | yes  | Update profile / complete onboarding |
+| GET    | `/api/profile/export`       | yes  | Export all of the user's data (JSON) |
+| DELETE | `/api/profile`              | yes  | Delete account + all data (cascade)  |
 | GET    | `/api/milestones`           | yes  | Timeline with per-user progress      |
 | GET    | `/api/savings`              | yes  | Savings + goal progress              |
 | POST   | `/api/cravings`             | yes  | Log a craving event                  |
 | GET    | `/api/cravings`             | yes  | Craving history                      |
 | GET    | `/api/cravings/stats`       | yes  | Totals for dashboard                 |
+| DELETE | `/api/cravings/:id`         | yes  | Delete one craving (privacy)         |
+| DELETE | `/api/cravings`             | yes  | Clear all craving/location history   |
+| GET    | `/api/notifications`        | yes  | Feed + unread count (auto-generates) |
+| POST   | `/api/notifications/read`   | yes  | Mark all notifications read          |
 | GET    | `/api/reflections`          | yes  | Anonymous reflection feed            |
 | POST   | `/api/reflections`          | yes  | Post an anonymous reflection         |
 | POST   | `/api/reflections/:id/report` | yes | Report → hide a reflection          |

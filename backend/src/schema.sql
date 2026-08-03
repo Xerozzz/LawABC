@@ -25,7 +25,16 @@ CREATE TABLE IF NOT EXISTS health_milestones (
   title           TEXT NOT NULL,
   description     TEXT NOT NULL,
   source_citation TEXT,
+  inferred        BOOLEAN DEFAULT FALSE,
   sort_order      INT NOT NULL
+);
+-- Migration for DBs created before `inferred` existed.
+ALTER TABLE health_milestones ADD COLUMN IF NOT EXISTS inferred BOOLEAN DEFAULT FALSE;
+
+-- Small key/value store for app metadata (e.g. seed version).
+CREATE TABLE IF NOT EXISTS app_meta (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS craving_events (
@@ -46,4 +55,18 @@ CREATE TABLE IF NOT EXISTS reflections (
   body            TEXT NOT NULL,
   status          TEXT NOT NULL DEFAULT 'visible',  -- 'visible' | 'hidden'
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Event-based notifications (milestone reached, savings goal, streaks).
+-- ref_key makes generation idempotent: we only insert a given notification once.
+CREATE TABLE IF NOT EXISTS notifications (
+  id              SERIAL PRIMARY KEY,
+  user_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type            TEXT NOT NULL,        -- 'milestone' | 'streak' | 'goal'
+  ref_key         TEXT NOT NULL,        -- e.g. 'milestone:5', 'streak:7', 'goal'
+  title           TEXT NOT NULL,
+  body            TEXT NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  read_at         TIMESTAMPTZ,
+  UNIQUE (user_id, ref_key)
 );

@@ -35,6 +35,7 @@ router.get("/", requireAuth, async (req, res) => {
       title: m.title,
       description: m.description,
       source: m.source_citation,
+      inferred: m.inferred,
       achieved,
       isNext,
       progress: Number(progress.toFixed(3)),

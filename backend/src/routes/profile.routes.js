@@ -58,4 +58,27 @@ router.put("/", requireAuth, async (req, res) => {
   res.json(shapeProfile(rows[0]));
 });
 
+// Export all of the user's data (privacy / data-portability).
+router.get("/export", requireAuth, async (req, res) => {
+  const [profile, cravings, reflections, notifications] = await Promise.all([
+    query("SELECT id, email, quit_date, weekly_spend, savings_goal_label, savings_goal_amount, consent_location, consent_share, created_at FROM users WHERE id = $1", [req.user.id]),
+    query("SELECT id, occurred_at, tool_used, outcome, lat, lng, context FROM craving_events WHERE user_id = $1 ORDER BY occurred_at", [req.user.id]),
+    query("SELECT id, milestone_id, body, status, created_at FROM reflections WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
+    query("SELECT id, type, title, body, created_at, read_at FROM notifications WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
+  ]);
+  res.json({
+    exportedAt: new Date().toISOString(),
+    profile: profile.rows[0],
+    cravings: cravings.rows,
+    reflections: reflections.rows,
+    notifications: notifications.rows,
+  });
+});
+
+// Delete the account and all associated data (ON DELETE CASCADE handles children).
+router.delete("/", requireAuth, async (req, res) => {
+  await query("DELETE FROM users WHERE id = $1", [req.user.id]);
+  res.json({ ok: true });
+});
+
 export default router;

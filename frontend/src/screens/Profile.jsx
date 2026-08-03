@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../AuthContext.jsx";
 
@@ -78,6 +79,7 @@ export default function Profile() {
         <button type="submit">Save changes</button>
       </form>
 
+      <Link to="/privacy"><button className="ghost" style={{ width: "100%" }}>🔒 Privacy &amp; data</button></Link>
       <button className="ghost" onClick={logout}>Log out</button>
     </div>
   );

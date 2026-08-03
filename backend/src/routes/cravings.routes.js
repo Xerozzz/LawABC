@@ -29,6 +29,25 @@ router.get("/", requireAuth, async (req, res) => {
   res.json(rows);
 });
 
+// Delete one craving event (privacy control).
+router.delete("/:id", requireAuth, async (req, res) => {
+  const { rowCount } = await query(
+    "DELETE FROM craving_events WHERE id = $1 AND user_id = $2",
+    [req.params.id, req.user.id]
+  );
+  if (rowCount === 0) return res.status(404).json({ error: "Not found" });
+  res.json({ ok: true });
+});
+
+// Clear ALL craving/location history for the user (privacy control).
+router.delete("/", requireAuth, async (req, res) => {
+  const { rowCount } = await query(
+    "DELETE FROM craving_events WHERE user_id = $1",
+    [req.user.id]
+  );
+  res.json({ ok: true, deleted: rowCount });
+});
+
 // Quick stats for the dashboard.
 router.get("/stats", requireAuth, async (req, res) => {
   const { rows } = await query(

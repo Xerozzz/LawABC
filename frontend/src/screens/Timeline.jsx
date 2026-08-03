@@ -43,6 +43,11 @@ export default function Timeline() {
                 </div>
                 <h3 style={{ margin: "0.5rem 0 0.3rem" }}>{m.title}</h3>
                 <p className="muted" style={{ margin: 0 }}>{m.description}</p>
+                {m.inferred && (
+                  <p className="muted" style={{ margin: "0.4rem 0 0", fontSize: "0.68rem", fontStyle: "italic" }}>
+                    ⓘ Inferred from nicotine/smoking research — vaping-specific data is still emerging.
+                  </p>
+                )}
                 {m.isNext && (
                   <div className="progress" style={{ marginTop: "0.7rem" }}>
                     <span style={{ width: `${m.progress * 100}%` }} />
@@ -54,11 +59,11 @@ export default function Timeline() {
         </div>
       </div>
 
-      {data.timeline[0]?.source && (
-        <p className="muted" style={{ fontSize: "0.72rem" }}>
-          Source: {data.timeline[0].source}
-        </p>
-      )}
+      <p className="muted" style={{ fontSize: "0.72rem" }}>
+        Sources: Truth Initiative, Cleveland Clinic, Smokefree.gov (NCI) and related nicotine-cessation
+        research. Items marked ⓘ are inferred from smoking/nicotine studies where vaping-specific data
+        is still limited. Not medical advice.
+      </p>
     </div>
   );
 }

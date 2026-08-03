@@ -1,0 +1,8 @@
+# Edge reverse proxy. SITE_ADDRESS controls TLS:
+#   - ":80"                  -> plain HTTP (default; fine for early testing)
+#   - "clearair.example.com" -> Caddy auto-provisions a Let's Encrypt certificate
+# The app container serves both the React app and the /api backend on port 4000.
+{$SITE_ADDRESS::80} {
+	encode gzip
+	reverse_proxy app:4000
+}

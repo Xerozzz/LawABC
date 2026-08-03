@@ -8,6 +8,9 @@ import Timeline from "./screens/Timeline.jsx";
 import Savings from "./screens/Savings.jsx";
 import CravingSOS from "./screens/CravingSOS.jsx";
 import Community from "./screens/Community.jsx";
+import TriggerMap from "./screens/TriggerMap.jsx";
+import Notifications from "./screens/Notifications.jsx";
+import Privacy from "./screens/Privacy.jsx";
 import Profile from "./screens/Profile.jsx";
 
 export default function App() {
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/savings" element={<Savings />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/triggers" element={<TriggerMap />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="/sos" element={<CravingSOS />} />

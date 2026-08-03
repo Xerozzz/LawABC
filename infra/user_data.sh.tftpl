@@ -1,0 +1,35 @@
+#!/bin/bash
+# ClearAir instance bootstrap (Amazon Linux 2023).
+set -euxo pipefail
+
+# --- Install Docker + git ---
+dnf update -y
+dnf install -y docker git
+systemctl enable --now docker
+usermod -aG docker ec2-user
+
+# --- Install the Docker Compose v2 plugin ---
+DOCKER_CLI_PLUGINS=/usr/local/lib/docker/cli-plugins
+mkdir -p "$DOCKER_CLI_PLUGINS"
+curl -fsSL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" \
+  -o "$DOCKER_CLI_PLUGINS/docker-compose"
+chmod +x "$DOCKER_CLI_PLUGINS/docker-compose"
+
+# --- Fetch the application source ---
+install -d -o ec2-user -g ec2-user /opt/clearair
+git clone --branch "${repo_branch}" "${repo_url}" /opt/clearair
+cd /opt/clearair
+
+# --- Runtime configuration (generated secrets) ---
+cat > /opt/clearair/.env <<EOF
+POSTGRES_USER=clearair
+POSTGRES_PASSWORD=${postgres_password}
+POSTGRES_DB=clearair
+JWT_SECRET=${jwt_secret}
+DEMO_SEED=true
+SITE_ADDRESS=${site_address}
+EOF
+chmod 600 /opt/clearair/.env
+
+# --- Build and start the stack ---
+docker compose -f docker-compose.prod.yml up -d --build

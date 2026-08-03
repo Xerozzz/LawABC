@@ -89,10 +89,10 @@ Legend: `[ ]` = todo · **S/M/L** = rough effort · → = depends on
 
 *Slide 5: track location/time/context of cravings, plot a trigger map, warn near risky environments.*
 
-- [ ] **S** Capture geolocation + timestamp + context when a craving is logged (browser Geolocation API; requires consent from E1)
-- [ ] **M** API: store craving locations; return aggregated "hot spots" for the user
-- [ ] **M** Map UI (Leaflet + OpenStreetMap is free; or Google Maps) plotting past trigger points
-- [ ] **L** Proximity warning: detect when user is near a known trigger zone, notify. (Note: reliable background geofencing is hard in a web app — scope MVP to foreground/PWA; flag native later)
+- [x] **S** Capture geolocation + timestamp + context when a craving is logged (done: CravingSOS grabs coords on check-in when consent is on)
+- [x] **M** API: store craving locations; return them for the user (done: `POST/GET /api/cravings`. Server-side "hot spot" aggregation still TODO — currently plotted client-side)
+- [x] **M** Map UI (Leaflet + OpenStreetMap) plotting past trigger points (done: `TriggerMap.jsx`, Map tab)
+- [x] **L** Proximity warning: warn when near a known trigger zone (done: foreground check within 200m via "Check where I am now". Background geofencing still flagged for native/PWA later)
 - [ ] **S** Privacy controls: view/delete location history
 
 ---
@@ -114,35 +114,42 @@ Legend: `[ ]` = todo · **S/M/L** = rough effort · → = depends on
 *Replaces the earlier Healthy 365 sync. The timeline is driven by our own researched dataset instead
 of pulling from an external programme.*
 
-- [ ] **M** Source **vaping-specific** health-recovery milestones from credible research (currently unfound).
-      Vaping ≠ smoking: no combustion, so carbon-monoxide / tar / lung-cancer milestones don't map directly —
-      expect a more **nicotine-focused** timeline (heart rate, blood pressure, nicotine clearance,
-      dopamine/receptor normalisation, sleep, mood, oral health).
-- [ ] **S** Interim: use the attached **smoking** recovery timeline as a labelled placeholder so E2 isn't blocked
-      (mark clearly as "based on smoking cessation data" in code + UI until vaping data is confirmed)
-- [ ] **S** Record each milestone as `{ time_after_quit, title, description, source_citation }`
+- [x] **M** Source **vaping-specific** health-recovery milestones from credible research
+      (done: nicotine-focused timeline sourced from Truth Initiative, Cleveland Clinic, Smokefree.gov/NCI,
+      Frontiers. Combustion-specific milestones — carbon monoxide, tar, lung cancer — dropped.)
+- [x] **S** ~~Smoking placeholder~~ replaced with the researched vaping dataset in `backend/src/milestones.seed.js`
+- [x] **S** Each milestone recorded as `{ minutes, time_label, title, description, source, inferred }`;
+      `inferred: true` items (20 min, 3 months, 1 year) are flagged in the UI as extrapolated from smoking data
 - [ ] **S** Have a counsellor / health advisor sanity-check the final dataset before pilot
 
-### Placeholder dataset (smoking — from attached infographic, swap for vaping when found)
+### Live dataset (vaping — in `milestones.seed.js`, version `vaping-v1`)
 
-| Time after quitting | Benefit |
-|---------------------|---------|
-| 20 minutes | Heart rate and blood pressure decrease |
-| A few days | Carbon monoxide levels return to normal *(combustion-specific — likely N/A for vaping)* |
-| 2–9 weeks | Circulation and lung function improve |
-| 1–12 months | Lungs heal further; less coughing and shortness of breath |
-| 1–2 years | Risk of coronary heart disease and heart attack reduced |
-| 5–10 years | Risk of mouth/throat/voice-box cancer halved; cervical cancer & stroke risk decline toward non-smoker |
-| 10 years | Lung-cancer mortality ~50% lower; bladder/esophagus/kidney cancer risk decreases |
-| 15 years | Coronary disease risk close to a non-smoker's |
+| Time after quitting | Benefit | Evidence |
+|---------------------|---------|----------|
+| 20 minutes | Heart rate & blood pressure drop | inferred |
+| 4–24 hours | Withdrawal begins (cravings, irritability) | direct |
+| 24 hours | Most nicotine cleared (~2h half-life) | direct |
+| 2–3 days | Withdrawal peaks, then eases | direct |
+| 1 week | Mood & cravings turn a corner | direct |
+| 2 weeks | Circulation & breathing improve | direct |
+| 2–4 weeks | Physical withdrawal resolves | direct |
+| 3 months | Dopamine system rebalances | inferred |
+| 1 year | Cardiovascular risk falls | inferred |
+
+*"inferred" = extrapolated from smoking/nicotine studies; vaping-specific longitudinal data is still emerging.*
 
 ---
 
 ## E8 — Cross-Cutting  *(Both)*
 
-- [ ] **M** Privacy & data protection: sensitive youth health + location data. Consent screens, data-deletion, minimal retention. (Called out as a pilot concern, slide 10)
-- [ ] **M** Content moderation policy + tooling for peer support (Phase 3 on slide 10)
-- [ ] **S** Notifications strategy (craving-time nudges, milestone celebrations) — PWA push or in-app
+- [~] **M** Privacy & data protection: sensitive youth health + location data.
+      (done: consent flag, view/delete location history, data export, account+data deletion via Privacy screen.
+      TODO: consent screens at signup, minimal-retention policy, encryption-at-rest review before pilot)
+- [~] **M** Content moderation: report-to-hide implemented for reflections.
+      TODO: profanity filter, moderator review queue (Phase 3 on slide 10)
+- [x] **S** Notifications (milestone celebrations, streaks, savings-goal): event-based, generated server-side,
+      in-app feed + bell badge + optional browser Notification opt-in.
+      TODO: scheduled craving-time / nighttime push needs a service worker + push server (flagged for later)
 - [ ] **S** Analytics for success metrics (slide 10): weekly active use, relapse/craving logs, feature engagement
 - [ ] **S** Accessibility & mobile-first responsive design
 - [ ] **M** Deployment: containerised deploy target, secrets management, DB backups (slide 9 budget: cloud hosting + secure auth)
