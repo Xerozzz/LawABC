@@ -39,6 +39,32 @@ resource "aws_key_pair" "this" {
   tags       = local.tags
 }
 
+# --- IAM role so the instance can be driven by AWS Systems Manager (SSM) ---
+# This lets CI trigger a redeploy via ssm:SendCommand with no inbound SSH.
+resource "aws_iam_role" "ssm" {
+  name = "${var.project_name}-ssm-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+    }]
+  })
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "this" {
+  name = "${var.project_name}-instance-profile"
+  role = aws_iam_role.ssm.name
+  tags = local.tags
+}
+
 resource "aws_security_group" "this" {
   name        = "${var.project_name}-sg"
   description = "ClearAir prototype: web in, SSH from admin only"
@@ -84,6 +110,7 @@ resource "aws_instance" "app" {
   subnet_id                   = data.aws_subnets.default.ids[0]
   key_name                    = aws_key_pair.this.key_name
   vpc_security_group_ids      = [aws_security_group.this.id]
+  iam_instance_profile        = aws_iam_instance_profile.this.name
   associate_public_ip_address = true
 
   root_block_device {

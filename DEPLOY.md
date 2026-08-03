@@ -77,6 +77,43 @@ docker compose -f docker-compose.prod.yml up --build
 # open http://localhost
 ```
 
+## Automatic deploys on push (GitHub Actions + SSM)
+
+`.github/workflows/deploy.yml` redeploys the instance on every push to `main`, using AWS
+Systems Manager to run the update on the box — **no SSH, no open ports**. One-time setup:
+
+**1. Apply the SSM role** (added to the Terraform):
+
+```bash
+cd infra && terraform apply
+```
+This is an in-place update that attaches an instance profile — your database is preserved.
+Wait ~2 minutes afterwards for the instance to register with SSM.
+
+**2. Create a deploy IAM user** with an access key and these permissions (scoped policy recommended;
+or quick-start with `AmazonSSMFullAccess` + `AmazonEC2ReadOnlyAccess`):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Effect": "Allow", "Action": ["ec2:DescribeInstances"], "Resource": "*" },
+    { "Effect": "Allow", "Action": ["ssm:SendCommand", "ssm:GetCommandInvocation"], "Resource": "*" }
+  ]
+}
+```
+
+**3. Add repository secrets** (GitHub → Settings → Secrets and variables → Actions):
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- *(optional variable)* `AWS_REGION` if not `ap-southeast-1`
+
+After that, every push to `main` runs the workflow (see the **Actions** tab). It does
+`git reset --hard origin/main` + `docker compose up -d --build` on the instance; the database
+volume persists across deploys. You can also trigger it manually from the Actions tab
+("Run workflow"). Until steps 1–3 are done, the workflow will appear and fail — that's expected.
+
 ## Security notes (prototype-grade)
 
 - SSH is restricted to `admin_cidr`; web ports 80/443 are open (as they must be).

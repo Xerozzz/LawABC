@@ -1,0 +1,89 @@
+name: Deploy to AWS
+
+# Redeploys the app on the EC2 instance whenever main changes.
+# Uses AWS Systems Manager (SSM) to run the update on the box — no SSH, no open ports.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   AWS_ACCESS_KEY_ID      - key for a deploy IAM user (ssm:SendCommand,
+#                            ssm:GetCommandInvocation, ec2:DescribeInstances)
+#   AWS_SECRET_ACCESS_KEY  - its secret
+# Optional repository variable:
+#   AWS_REGION             - defaults to ap-southeast-1
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+
+      - name: Find the running instance
+        id: ec2
+        run: |
+          ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=clearair-app" "Name=instance-state-name,Values=running" \
+            --query "Reservations[].Instances[].InstanceId" --output text)
+          if [ -z "$ID" ] || [ "$ID" = "None" ]; then
+            echo "::error::No running instance tagged Name=clearair-app was found."
+            exit 1
+          fi
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "Instance: $ID"
+
+      - name: Trigger redeploy via SSM
+        id: ssm
+        run: |
+          CMD=$(aws ssm send-command \
+            --instance-ids "${{ steps.ec2.outputs.id }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "CI deploy ${GITHUB_SHA::7}" \
+            --parameters '{"commands":[
+              "set -euo pipefail",
+              "git config --global --add safe.directory /opt/clearair",
+              "cd /opt/clearair",
+              "git fetch --all --prune",
+              "git reset --hard origin/main",
+              "docker compose -f docker-compose.prod.yml up -d --build",
+              "docker image prune -f"
+            ]}' \
+            --query "Command.CommandId" --output text)
+          echo "cmd=$CMD" >> "$GITHUB_OUTPUT"
+          echo "SSM command: $CMD"
+
+      - name: Wait for the redeploy to finish
+        run: |
+          aws ssm wait command-executed \
+            --command-id "${{ steps.ssm.outputs.cmd }}" \
+            --instance-id "${{ steps.ec2.outputs.id }}" || true
+
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id "${{ steps.ssm.outputs.cmd }}" \
+            --instance-id "${{ steps.ec2.outputs.id }}" \
+            --query "Status" --output text)
+
+          echo "----- stdout -----"
+          aws ssm get-command-invocation \
+            --command-id "${{ steps.ssm.outputs.cmd }}" \
+            --instance-id "${{ steps.ec2.outputs.id }}" \
+            --query "StandardOutputContent" --output text || true
+          echo "----- stderr -----"
+          aws ssm get-command-invocation \
+            --command-id "${{ steps.ssm.outputs.cmd }}" \
+            --instance-id "${{ steps.ec2.outputs.id }}" \
+            --query "StandardErrorContent" --output text || true
+
+          echo "Final status: $STATUS"
+          test "$STATUS" = "Success"
