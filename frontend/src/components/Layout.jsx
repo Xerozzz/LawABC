@@ -16,19 +16,25 @@ export default function Layout() {
   const location = useLocation();
   const [unread, setUnread] = useState(0);
 
-  // Refresh the unread badge on every navigation (cheap, keeps it current).
+  // Refresh the unread badge + log a screen view on every navigation.
   useEffect(() => {
     api.getNotifications().then((d) => setUnread(d.unread)).catch(() => {});
+    api.logEvent("screen_view", { path: location.pathname });
   }, [location.pathname]);
 
   return (
     <>
       <header className="topbar">
         <span className="brand">🌬️ ClearAir</span>
-        <button className="bell" onClick={() => navigate("/notifications")} aria-label="Notifications">
-          🔔
-          {unread > 0 && <span className="bell-badge">{unread > 9 ? "9+" : unread}</span>}
-        </button>
+        <div className="row" style={{ gap: "0.25rem" }}>
+          <button className="bell" onClick={() => navigate("/help")} aria-label="Get help" title="Get help">
+            ⛑️
+          </button>
+          <button className="bell" onClick={() => navigate("/notifications")} aria-label="Notifications">
+            🔔
+            {unread > 0 && <span className="bell-badge">{unread > 9 ? "9+" : unread}</span>}
+          </button>
+        </div>
       </header>
 
       <div className="container">

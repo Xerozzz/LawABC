@@ -36,8 +36,13 @@ export const api = {
 
   getProfile: () => request("/profile"),
   updateProfile: (patch) => request("/profile", { method: "PUT", body: patch }),
+  acceptConsent: () => request("/profile/consent", { method: "POST" }),
   exportData: () => request("/profile/export"),
   deleteAccount: () => request("/profile", { method: "DELETE" }),
+
+  // Fire-and-forget analytics; never let logging break the UI.
+  logEvent: (type, meta) =>
+    request("/events", { method: "POST", body: { type, meta } }).catch(() => {}),
 
   getMilestones: () => request("/milestones"),
   getSavings: () => request("/savings"),

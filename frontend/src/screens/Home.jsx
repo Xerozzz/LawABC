@@ -60,6 +60,16 @@ export default function Home() {
         <p className="muted">A craving lasts only a few minutes. Ride it out with a 60-second reset.</p>
         <Link to="/sos"><button style={{ width: "100%" }}>🆘 Start Craving SOS</button></Link>
       </div>
+
+      <Link to="/help" className="card" style={{ textDecoration: "none", color: "inherit" }}>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <div>
+            <strong>⛑️ Need more support?</strong>
+            <div className="muted" style={{ fontSize: "0.85rem" }}>Free, confidential help is one tap away.</div>
+          </div>
+          <span className="muted">›</span>
+        </div>
+      </Link>
     </div>
   );
 }

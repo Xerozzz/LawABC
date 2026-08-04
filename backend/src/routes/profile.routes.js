@@ -14,6 +14,7 @@ const shapeProfile = (u) => ({
     u.savings_goal_amount == null ? null : Number(u.savings_goal_amount),
   consentLocation: u.consent_location,
   consentShare: u.consent_share,
+  consentAcceptedAt: u.consent_accepted_at,
   onboarded: u.onboarded,
 });
 
@@ -58,13 +59,23 @@ router.put("/", requireAuth, async (req, res) => {
   res.json(shapeProfile(rows[0]));
 });
 
+// Record that the user accepted the privacy notice (blocking consent step).
+router.post("/consent", requireAuth, async (req, res) => {
+  const { rows } = await query(
+    "UPDATE users SET consent_accepted_at = COALESCE(consent_accepted_at, NOW()) WHERE id = $1 RETURNING *",
+    [req.user.id]
+  );
+  res.json(shapeProfile(rows[0]));
+});
+
 // Export all of the user's data (privacy / data-portability).
 router.get("/export", requireAuth, async (req, res) => {
-  const [profile, cravings, reflections, notifications] = await Promise.all([
-    query("SELECT id, email, quit_date, weekly_spend, savings_goal_label, savings_goal_amount, consent_location, consent_share, created_at FROM users WHERE id = $1", [req.user.id]),
+  const [profile, cravings, reflections, notifications, events] = await Promise.all([
+    query("SELECT id, email, quit_date, weekly_spend, savings_goal_label, savings_goal_amount, consent_location, consent_share, consent_accepted_at, created_at FROM users WHERE id = $1", [req.user.id]),
     query("SELECT id, occurred_at, tool_used, outcome, lat, lng, context FROM craving_events WHERE user_id = $1 ORDER BY occurred_at", [req.user.id]),
     query("SELECT id, milestone_id, body, status, created_at FROM reflections WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
     query("SELECT id, type, title, body, created_at, read_at FROM notifications WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
+    query("SELECT id, type, meta, created_at FROM events WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
   ]);
   res.json({
     exportedAt: new Date().toISOString(),
@@ -72,6 +83,7 @@ router.get("/export", requireAuth, async (req, res) => {
     cravings: cravings.rows,
     reflections: reflections.rows,
     notifications: notifications.rows,
+    events: events.rows,
   });
 });
 

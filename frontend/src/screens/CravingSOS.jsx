@@ -23,6 +23,7 @@ export default function CravingSOS() {
     setTool(t);
     setStep("run");
     startedAt.current = Date.now();
+    api.logEvent("sos_started", { tool: t });
   };
 
   const finishAndLog = async (outcome) => {
@@ -87,6 +88,10 @@ export default function CravingSOS() {
               💨 I vaped — that's okay, keep going
             </button>
           </div>
+          <p className="muted" style={{ marginTop: "1.2rem", fontSize: "0.85rem", textAlign: "center" }}>
+            Struggling more than usual?{" "}
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate("/help"); }}>Find real support →</a>
+          </p>
         </>
       )}
     </div>

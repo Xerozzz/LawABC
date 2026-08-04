@@ -11,9 +11,12 @@ CREATE TABLE IF NOT EXISTS users (
   savings_goal_amount  NUMERIC(10, 2),
   consent_location     BOOLEAN DEFAULT FALSE,
   consent_share        BOOLEAN DEFAULT FALSE,
+  consent_accepted_at  TIMESTAMPTZ,
   onboarded       BOOLEAN DEFAULT FALSE,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- Migration for DBs created before consent tracking existed.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS consent_accepted_at TIMESTAMPTZ;
 
 -- Reference data: researched health-recovery milestones.
 -- NOTE: currently seeded with SMOKING cessation data as a placeholder.
@@ -56,6 +59,16 @@ CREATE TABLE IF NOT EXISTS reflections (
   status          TEXT NOT NULL DEFAULT 'visible',  -- 'visible' | 'hidden'
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Lightweight product analytics (screen views + key actions) for the pilot.
+CREATE TABLE IF NOT EXISTS events (
+  id          SERIAL PRIMARY KEY,
+  user_id     INT REFERENCES users(id) ON DELETE CASCADE,
+  type        TEXT NOT NULL,
+  meta        JSONB,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS events_type_time_idx ON events (type, created_at);
 
 -- Event-based notifications (milestone reached, savings goal, streaks).
 -- ref_key makes generation idempotent: we only insert a given notification once.

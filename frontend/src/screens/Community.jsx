@@ -25,6 +25,7 @@ export default function Community() {
     setError("");
     try {
       await api.postReflection(body.trim());
+      api.logEvent("reflection_posted");
       setBody("");
       await load();
     } catch (err) {

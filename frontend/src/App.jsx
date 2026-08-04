@@ -2,7 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext.jsx";
 import Layout from "./components/Layout.jsx";
 import AuthScreen from "./screens/AuthScreen.jsx";
+import Consent from "./screens/Consent.jsx";
 import Onboarding from "./screens/Onboarding.jsx";
+import Help from "./screens/Help.jsx";
 import Home from "./screens/Home.jsx";
 import Timeline from "./screens/Timeline.jsx";
 import Savings from "./screens/Savings.jsx";
@@ -22,6 +24,8 @@ export default function App() {
 
   if (!user) return <AuthScreen />;
 
+  if (!user.consentAcceptedAt) return <Consent />;
+
   if (!user.onboarded) return <Onboarding />;
 
   return (
@@ -33,6 +37,7 @@ export default function App() {
         <Route path="/community" element={<Community />} />
         <Route path="/triggers" element={<TriggerMap />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/help" element={<Help />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
