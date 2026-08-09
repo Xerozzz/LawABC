@@ -46,10 +46,29 @@ Testers just tap **Sign up** and create their own account (email + password, low
 
 Plain HTTP works for everything **except** "Check where I am now" on the Trigger Map and device notifications — browsers block geolocation/Notifications on insecure origins.
 
-To enable HTTPS:
+**With a domain:**
 1. Point a domain's **DNS A record** at the Elastic IP from `terraform output public_ip`.
 2. Set `site_address = "yourdomain.com"` in `terraform.tfvars`.
 3. `terraform apply` again. Caddy auto-provisions a Let's Encrypt certificate.
+
+**Without a domain (free, using sslip.io):**
+A wildcard-DNS hostname like `54-179-1-2.sslip.io` resolves to `54.179.1.2`, so Caddy can
+get a real certificate for it — no domain purchase needed. On the **already-running** instance
+this avoids replacing the box (no data loss):
+
+```bash
+# 1. get the IP
+terraform -chdir=infra output -raw public_ip        # e.g. 54.179.1.2
+# 2. on the instance, set the hostname (dashes) + restart Caddy
+ssh ec2-user@<ip>
+cd /opt/clearair
+sed -i 's/^SITE_ADDRESS=.*/SITE_ADDRESS=54-179-1-2.sslip.io/' .env   # use YOUR dashed IP
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Then open `https://54-179-1-2.sslip.io`. Caddy fetches a cert automatically (Let's Encrypt, with
+ZeroSSL as fallback). This unlocks the map's live geolocation and Web Push. For a fresh `terraform
+apply` deploy, set `site_address` in `terraform.tfvars` to the dashed-IP sslip hostname instead.
 
 ## Updating the app after a code change
 

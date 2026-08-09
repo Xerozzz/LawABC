@@ -92,6 +92,10 @@ export default function TriggerMap() {
   const checkMyLocation = () => {
     setError("");
     setDenied(false);
+    if (!window.isSecureContext) {
+      setError("Live location needs a secure (https) connection — it'll work once the site is on https.");
+      return;
+    }
     if (!("geolocation" in navigator)) {
       setError("Location isn't available on this device or browser.");
       return;
@@ -169,11 +173,7 @@ export default function TriggerMap() {
         }}
       />
 
-      <div className="badge" style={{ color: "var(--accent)" }}>🚧 Work in progress</div>
       <button onClick={checkMyLocation}>📍 Check where I am now</button>
-      <p className="muted" style={{ fontSize: "0.75rem", marginTop: "-0.4rem" }}>
-        Live location &amp; nearby-trigger alerts are still being built — may not work yet.
-      </p>
 
       {cravings.length === 0 && (
         <div className="card muted">
