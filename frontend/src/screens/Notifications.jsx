@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api.js";
-import { enablePush, pushSupported } from "../push.js";
 
 function timeAgo(iso) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -17,11 +16,10 @@ export default function Notifications() {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pushState, setPushState] = useState(
+  // 'granted' when device notifications are already allowed; otherwise show WIP.
+  const [pushState] = useState(
     typeof Notification !== "undefined" ? Notification.permission : "unsupported"
   );
-  const [pushBusy, setPushBusy] = useState(false);
-  const [pushError, setPushError] = useState("");
 
   useEffect(() => {
     api
@@ -35,19 +33,6 @@ export default function Notifications() {
       .finally(() => setLoading(false));
   }, []);
 
-  const turnOnPush = async () => {
-    setPushError("");
-    setPushBusy(true);
-    try {
-      await enablePush(); // registers SW, subscribes, sends a confirmation push
-      setPushState("granted");
-    } catch (e) {
-      setPushError(e.message);
-    } finally {
-      setPushBusy(false);
-    }
-  };
-
   return (
     <div className="stack">
       <div className="row" style={{ justifyContent: "space-between" }}>
@@ -57,15 +42,13 @@ export default function Notifications() {
         </button>
       </div>
 
-      {pushSupported() && pushState !== "granted" && (
-        <div className="card">
-          <p className="muted" style={{ marginTop: 0 }}>
-            Get a morning boost and an evening check-in on this device — even when the app is closed.
+      {pushState !== "granted" && (
+        <div className="card" style={{ borderStyle: "dashed" }}>
+          <div className="badge" style={{ color: "var(--accent)", marginBottom: "0.5rem" }}>🚧 Work in progress</div>
+          <p className="muted" style={{ margin: 0 }}>
+            Soon: a morning boost and an evening check-in on this device — even when the app is closed.
+            We're still building this out, so it's not switched on yet.
           </p>
-          {pushError && <div className="error" style={{ marginBottom: "0.6rem" }}>{pushError}</div>}
-          <button className="accent" onClick={turnOnPush} disabled={pushBusy}>
-            {pushBusy ? "Turning on…" : "Enable device notifications"}
-          </button>
         </div>
       )}
       {pushState === "granted" && (
