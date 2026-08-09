@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../AuthContext.jsx";
 import BreathingExercise from "../components/BreathingExercise.jsx";
-import MiniGame from "../components/MiniGame.jsx";
+import GamePicker from "../components/GamePicker.jsx";
 import MotivationalStory from "../components/MotivationalStory.jsx";
 
 const TOOLS = [
   { key: "breathing", icon: "🫁", label: "Breathe", desc: "60-second guided breathing" },
-  { key: "game", icon: "🎮", label: "Distract", desc: "Quick tap mini-game" },
+  { key: "game", icon: "🎮", label: "Distract", desc: "Mini-games: Tap, 2048 or Flappy" },
   { key: "story", icon: "📖", label: "Get inspired", desc: "A short motivational story" },
 ];
 
@@ -69,7 +69,7 @@ export default function CravingSOS() {
       {step === "run" && (
         <>
           {tool === "breathing" && <BreathingExercise onDone={() => setStep("checkin")} />}
-          {tool === "game" && <MiniGame onDone={() => setStep("checkin")} />}
+          {tool === "game" && <GamePicker onDone={() => setStep("checkin")} />}
           {tool === "story" && <MotivationalStory onDone={() => setStep("checkin")} />}
           <button className="ghost" style={{ marginTop: "1.5rem" }} onClick={() => setStep("checkin")}>
             I'm done

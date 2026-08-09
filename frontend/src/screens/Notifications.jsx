@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api.js";
+import { enablePush, pushSupported } from "../push.js";
 
 function timeAgo(iso) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -19,6 +20,8 @@ export default function Notifications() {
   const [pushState, setPushState] = useState(
     typeof Notification !== "undefined" ? Notification.permission : "unsupported"
   );
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushError, setPushError] = useState("");
 
   useEffect(() => {
     api
@@ -32,14 +35,16 @@ export default function Notifications() {
       .finally(() => setLoading(false));
   }, []);
 
-  const enablePush = async () => {
-    if (typeof Notification === "undefined") return;
-    const perm = await Notification.requestPermission();
-    setPushState(perm);
-    if (perm === "granted") {
-      new Notification("ClearAir notifications on 🔔", {
-        body: "We'll cheer you on at every milestone.",
-      });
+  const turnOnPush = async () => {
+    setPushError("");
+    setPushBusy(true);
+    try {
+      await enablePush(); // registers SW, subscribes, sends a confirmation push
+      setPushState("granted");
+    } catch (e) {
+      setPushError(e.message);
+    } finally {
+      setPushBusy(false);
     }
   };
 
@@ -52,13 +57,19 @@ export default function Notifications() {
         </button>
       </div>
 
-      {pushState !== "granted" && pushState !== "unsupported" && (
+      {pushSupported() && pushState !== "granted" && (
         <div className="card">
           <p className="muted" style={{ marginTop: 0 }}>
-            Get a nudge on this device when you hit a milestone.
+            Get a morning boost and an evening check-in on this device — even when the app is closed.
           </p>
-          <button className="accent" onClick={enablePush}>Enable device notifications</button>
+          {pushError && <div className="error" style={{ marginBottom: "0.6rem" }}>{pushError}</div>}
+          <button className="accent" onClick={turnOnPush} disabled={pushBusy}>
+            {pushBusy ? "Turning on…" : "Enable device notifications"}
+          </button>
         </div>
+      )}
+      {pushState === "granted" && (
+        <div className="badge" style={{ color: "var(--success)" }}>✓ Device notifications on</div>
       )}
 
       {loading && <p className="muted">Loading…</p>}

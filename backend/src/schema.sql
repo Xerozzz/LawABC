@@ -46,10 +46,18 @@ CREATE TABLE IF NOT EXISTS health_milestones (
 -- Migration for DBs created before `inferred` existed.
 ALTER TABLE health_milestones ADD COLUMN IF NOT EXISTS inferred BOOLEAN DEFAULT FALSE;
 
--- Small key/value store for app metadata (e.g. seed version).
+-- Small key/value store for app metadata (e.g. seed version, VAPID keys).
 CREATE TABLE IF NOT EXISTS app_meta (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
+);
+
+-- Web Push subscriptions (one per browser/device).
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  endpoint     TEXT PRIMARY KEY,
+  user_id      INT REFERENCES users(id) ON DELETE CASCADE,
+  subscription JSONB NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS craving_events (

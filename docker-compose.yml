@@ -25,6 +25,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4000
+      TZ: ${TZ:-Asia/Singapore}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       DATABASE_URL: postgres://${POSTGRES_USER:-lawabc}:${POSTGRES_PASSWORD:-lawabc_password}@db:5432/${POSTGRES_DB:-lawabc}
     ports:

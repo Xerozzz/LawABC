@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { initDb } from "./db.js";
+import { initPush } from "./push.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -16,6 +17,7 @@ import reflectionsRoutes from "./routes/reflections.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
 import eventsRoutes from "./routes/events.routes.js";
 import rewardsRoutes from "./routes/rewards.routes.js";
+import pushRoutes from "./routes/push.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -36,6 +38,7 @@ app.use("/api/reflections", reflectionsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api/rewards", rewardsRoutes);
+app.use("/api/push", pushRoutes);
 
 // In production the built frontend is copied to ./public and served from the
 // same origin as the API. The SPA fallback returns index.html for client routes
@@ -53,6 +56,7 @@ if (existsSync(publicDir)) {
 async function start() {
   try {
     await initDb();
+    await initPush();
     app.listen(PORT, () => {
       console.log(`ClearAir backend listening on http://localhost:${PORT}`);
     });

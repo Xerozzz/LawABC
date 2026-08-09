@@ -70,4 +70,8 @@ export const api = {
   getRewards: () => request("/rewards"),
   unlockReward: (itemKey) => request("/rewards/unlock", { method: "POST", body: { itemKey } }),
   selectReward: (itemKey) => request("/rewards/select", { method: "POST", body: { itemKey } }),
+
+  getVapidKey: () => request("/push/vapid-public-key"),
+  subscribePush: (subscription) => request("/push/subscribe", { method: "POST", body: { subscription } }),
+  testPush: () => request("/push/test", { method: "POST" }),
 };
