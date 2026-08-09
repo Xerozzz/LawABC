@@ -2,73 +2,103 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../AuthContext.jsx";
+import TreeGrowth from "../components/TreeGrowth.jsx";
 
 export default function Home() {
   const { user } = useAuth();
   const [savings, setSavings] = useState(null);
-  const [stats, setStats] = useState(null);
-  const [nextMilestone, setNextMilestone] = useState(null);
+  const [milestones, setMilestones] = useState(null);
 
   useEffect(() => {
     api.getSavings().then(setSavings).catch(() => {});
-    api.getCravingStats().then(setStats).catch(() => {});
-    api.getMilestones().then((d) => {
-      setNextMilestone(d.timeline.find((m) => m.isNext) || null);
-    }).catch(() => {});
+    api.getMilestones().then(setMilestones).catch(() => {});
   }, []);
 
-  const daysQuit = savings?.daysQuit ?? 0;
+  const days = savings?.daysQuit ?? 0;
+  const timeline = milestones?.timeline || [];
+  const achieved = timeline.filter((m) => m.achieved).length;
+  const healPct = timeline.length ? Math.round((achieved / timeline.length) * 100) : 0;
+  const next = timeline.find((m) => m.isNext);
+
+  const name = user?.email ? user.email.split("@")[0].replace(/[^a-zA-Z]/g, "") : "";
+  const greetName = name ? name.charAt(0).toUpperCase() + name.slice(1) : "there";
 
   return (
     <div className="stack">
-      <div>
-        <p className="muted" style={{ margin: 0 }}>Welcome back 👋</p>
-        <h1 className="h1">You've got this.</h1>
+      {/* greeting + streak */}
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <h1 className="h1" style={{ margin: 0 }}>Hey {greetName}! 👋</h1>
+          <p className="muted" style={{ margin: 0 }}>You've got this.</p>
+        </div>
+        <span className="streak">🔥 {days} day{days === 1 ? "" : "s"}</span>
       </div>
 
-      <div className="card" style={{ textAlign: "center" }}>
-        <div className="stat" style={{ color: "var(--brand)" }}>{daysQuit}</div>
-        <div className="stat-label">day{daysQuit === 1 ? "" : "s"} vape-free</div>
+      {/* hero progress */}
+      <div className="hero">
+        <div style={{ fontWeight: 700, opacity: 0.85 }}>My Progress</div>
+        <div className="muted" style={{ color: "#3d6a86", fontSize: "0.85rem", marginTop: "0.2rem" }}>Vape-free for</div>
+        <div className="big">{days} <span style={{ fontSize: "1.1rem", fontWeight: 700 }}>day{days === 1 ? "" : "s"}</span></div>
+        <TreeGrowth days={days} />
       </div>
 
-      <div className="row" style={{ gap: "1rem" }}>
-        <Link to="/savings" className="card" style={{ flex: 1, textDecoration: "none", color: "inherit" }}>
-          <div className="stat" style={{ fontSize: "1.6rem", color: "var(--accent)" }}>
-            ${savings ? savings.saved.toFixed(2) : "0.00"}
+      {/* health recovery */}
+      <Link to="/timeline" className="card" style={{ textDecoration: "none", color: "inherit" }}>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <div className="row" style={{ gap: "0.7rem" }}>
+            <span className="metric-ico" style={{ background: "#e7f8f2" }}>❤️</span>
+            <div>
+              <strong>Health Recovery</strong>
+              <div className="muted" style={{ fontSize: "0.8rem" }}>See how your body is healing</div>
+            </div>
           </div>
-          <div className="stat-label">saved so far</div>
-        </Link>
-        <Link to="/community" className="card" style={{ flex: 1, textDecoration: "none", color: "inherit" }}>
-          <div className="stat" style={{ fontSize: "1.6rem" }}>
-            {stats ? stats.beaten : 0}
-          </div>
-          <div className="stat-label">cravings beaten</div>
-        </Link>
-      </div>
+          <strong style={{ color: "var(--brand)" }}>{healPct}%</strong>
+        </div>
+        <div className="progress" style={{ marginTop: "0.8rem" }}><span style={{ width: `${healPct}%` }} /></div>
+      </Link>
 
-      {nextMilestone && (
-        <Link to="/timeline" className="card" style={{ textDecoration: "none", color: "inherit" }}>
-          <div className="badge">Next health milestone</div>
-          <h3 style={{ margin: "0.5rem 0 0.3rem" }}>{nextMilestone.title}</h3>
-          <p className="muted" style={{ margin: "0 0 0.6rem" }}>{nextMilestone.timeLabel} · {nextMilestone.description}</p>
-          <div className="progress"><span style={{ width: `${nextMilestone.progress * 100}%` }} /></div>
+      {/* money saved */}
+      <Link to="/savings" className="card" style={{ textDecoration: "none", color: "inherit" }}>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <div className="row" style={{ gap: "0.7rem" }}>
+            <span className="metric-ico" style={{ background: "#fff4d9" }}>💰</span>
+            <div>
+              <strong>Money Saved</strong>
+              <div className="muted" style={{ fontSize: "0.8rem" }}>
+                {savings?.goalLabel ? `towards ${savings.goalLabel}` : "keep it up"}
+              </div>
+            </div>
+          </div>
+          <strong style={{ color: "var(--accent)" }}>${savings ? savings.saved.toFixed(2) : "0.00"}</strong>
+        </div>
+        {savings?.goalProgress != null && (
+          <div className="progress" style={{ marginTop: "0.8rem" }}>
+            <span style={{ width: `${Math.round(savings.goalProgress * 100)}%`, background: "linear-gradient(90deg,#ffb703,#ffcf4d)" }} />
+          </div>
+        )}
+      </Link>
+
+      {/* next milestone */}
+      {next && (
+        <Link to="/timeline" className="card" style={{ textDecoration: "none", color: "inherit", background: "linear-gradient(135deg,#f3f0ff,#ffffff)" }}>
+          <div className="row" style={{ gap: "0.7rem" }}>
+            <span className="metric-ico" style={{ background: "#ebe7ff" }}>🫁</span>
+            <div>
+              <div className="badge" style={{ color: "var(--purple)" }}>Next milestone</div>
+              <strong style={{ display: "block", marginTop: "0.3rem" }}>{next.title}</strong>
+              <div className="muted" style={{ fontSize: "0.8rem" }}>{next.timeLabel} · {Math.round(next.progress * 100)}% there</div>
+            </div>
+          </div>
         </Link>
       )}
 
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Hit by a craving?</h3>
-        <p className="muted">It'll pass in a few minutes — promise. Let's ride it out together.</p>
-        <Link to="/sos"><button style={{ width: "100%" }}>🆘 Start Craving SOS</button></Link>
-      </div>
-
-      <Link to="/help" className="card" style={{ textDecoration: "none", color: "inherit" }}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <div>
-            <strong>⛑️ Need more support?</strong>
-            <div className="muted" style={{ fontSize: "0.85rem" }}>Free, confidential help is one tap away.</div>
-          </div>
-          <span className="muted">›</span>
+      {/* trigger map quick link */}
+      <Link to="/triggers" className="card row" style={{ textDecoration: "none", color: "inherit", justifyContent: "space-between" }}>
+        <div className="row" style={{ gap: "0.7rem" }}>
+          <span className="metric-ico" style={{ backgroundColor: "#ffecec" }}>📍</span>
+          <strong>Trigger map</strong>
         </div>
+        <span className="muted">›</span>
       </Link>
     </div>
   );

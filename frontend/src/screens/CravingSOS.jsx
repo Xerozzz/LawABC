@@ -49,17 +49,27 @@ export default function CravingSOS() {
     <div className="center-screen">
       {step === "choose" && (
         <>
-          <button className="ghost" style={{ alignSelf: "flex-start", marginBottom: "1rem" }} onClick={() => navigate(-1)}>
+          <button className="ghost" style={{ alignSelf: "flex-start", marginBottom: "0.5rem" }} onClick={() => navigate(-1)}>
             ← Back
           </button>
-          <h1 className="h1">Craving SOS 🆘</h1>
-          <p className="muted">Urges peak and fade in a few minutes. Pick something to ride it out.</p>
-          <div className="stack" style={{ marginTop: "1rem" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              width: 120, height: 120, borderRadius: "50%", margin: "0.5rem auto 1rem",
+              background: "radial-gradient(circle at 40% 35%, #ff9d9d, var(--danger))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#fff", fontWeight: 800, fontSize: "1rem", textAlign: "center",
+              boxShadow: "0 14px 30px rgba(255,90,106,0.4)",
+            }}>
+              You've<br />got this
+            </div>
+            <h1 className="h1">Craving SOS</h1>
+            <p className="muted">Urges peak and fade in a few minutes. Pick a 60-second activity.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "0.7rem", marginTop: "0.5rem" }}>
             {TOOLS.map((t) => (
-              <button key={t.key} className="ghost" style={{ textAlign: "left", padding: "1rem" }} onClick={() => start(t.key)}>
-                <div style={{ fontSize: "1.6rem" }}>{t.icon}</div>
-                <div style={{ fontWeight: 700 }}>{t.label}</div>
-                <div className="muted" style={{ fontSize: "0.85rem" }}>{t.desc}</div>
+              <button key={t.key} className="ghost" style={{ padding: "1rem 0.4rem", display: "flex", flexDirection: "column", gap: "0.35rem" }} onClick={() => start(t.key)}>
+                <span style={{ fontSize: "1.8rem" }}>{t.icon}</span>
+                <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{t.label}</span>
               </button>
             ))}
           </div>
