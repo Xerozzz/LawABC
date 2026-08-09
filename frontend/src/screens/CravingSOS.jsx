@@ -79,11 +79,11 @@ export default function CravingSOS() {
 
       {step === "checkin" && (
         <>
-          <h1 className="h1">How do you feel now?</h1>
-          <p className="muted">Logging this helps you spot patterns over time.</p>
+          <h1 className="h1">How'd that go?</h1>
+          <p className="muted">No judgement either way — this just helps you spot your patterns.</p>
           <div className="stack" style={{ marginTop: "1rem" }}>
             <button onClick={() => finishAndLog("passed")}>😌 The craving passed</button>
-            <button className="ghost" onClick={() => finishAndLog("unknown")}>😐 Still tough, but holding on</button>
+            <button className="ghost" onClick={() => finishAndLog("held")}>😤 Still tough, but I held on</button>
             <button className="ghost" onClick={() => finishAndLog("vaped")}>
               💨 I vaped — that's okay, keep going
             </button>

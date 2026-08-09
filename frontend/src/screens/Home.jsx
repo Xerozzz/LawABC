@@ -40,7 +40,7 @@ export default function Home() {
         </Link>
         <Link to="/community" className="card" style={{ flex: 1, textDecoration: "none", color: "inherit" }}>
           <div className="stat" style={{ fontSize: "1.6rem" }}>
-            {stats ? stats.passed : 0}
+            {stats ? stats.beaten : 0}
           </div>
           <div className="stat-label">cravings beaten</div>
         </Link>
@@ -56,8 +56,8 @@ export default function Home() {
       )}
 
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Feeling the urge?</h3>
-        <p className="muted">A craving lasts only a few minutes. Ride it out with a 60-second reset.</p>
+        <h3 style={{ marginTop: 0 }}>Hit by a craving?</h3>
+        <p className="muted">It'll pass in a few minutes — promise. Let's ride it out together.</p>
         <Link to="/sos"><button style={{ width: "100%" }}>🆘 Start Craving SOS</button></Link>
       </div>
 

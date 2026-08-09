@@ -15,6 +15,7 @@ import cravingsRoutes from "./routes/cravings.routes.js";
 import reflectionsRoutes from "./routes/reflections.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
 import eventsRoutes from "./routes/events.routes.js";
+import rewardsRoutes from "./routes/rewards.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -34,6 +35,7 @@ app.use("/api/cravings", cravingsRoutes);
 app.use("/api/reflections", reflectionsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/events", eventsRoutes);
+app.use("/api/rewards", rewardsRoutes);
 
 // In production the built frontend is copied to ./public and served from the
 // same origin as the API. The SPA fallback returns index.html for client routes

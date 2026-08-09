@@ -9,14 +9,30 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+const CHANNELS = [
+  { key: "prompt", label: "🌟 Today's prompt" },
+  { key: "general", label: "General" },
+  { key: "cravings", label: "Cravings" },
+  { key: "wins", label: "Wins" },
+  { key: "advice", label: "Advice" },
+  { key: "vent", label: "Vent" },
+];
+
 export default function Community() {
+  const [active, setActive] = useState("prompt");
+  const [prompt, setPrompt] = useState(null);
   const [reflections, setReflections] = useState([]);
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const load = () => api.getReflections().then(setReflections).catch((e) => setError(e.message));
-  useEffect(() => { load(); }, []);
+  useEffect(() => { api.getDailyPrompt().then(setPrompt).catch(() => {}); }, []);
+
+  const load = () => {
+    const params = active === "prompt" ? { promptId: prompt?.id } : { channel: active };
+    return api.getReflections(params).then(setReflections).catch((e) => setError(e.message));
+  };
+  useEffect(() => { if (active !== "prompt" || prompt) load(); /* eslint-disable-next-line */ }, [active, prompt]);
 
   const post = async (e) => {
     e.preventDefault();
@@ -24,8 +40,11 @@ export default function Community() {
     setBusy(true);
     setError("");
     try {
-      await api.postReflection(body.trim());
-      api.logEvent("reflection_posted");
+      const opts = active === "prompt"
+        ? { promptId: prompt?.id, channel: "general" }
+        : { channel: active };
+      await api.postReflection(body.trim(), opts);
+      api.logEvent("reflection_posted", { channel: active });
       setBody("");
       await load();
     } catch (err) {
@@ -39,8 +58,29 @@ export default function Community() {
     <div className="stack">
       <div>
         <h1 className="h1">Community 💬</h1>
-        <p className="muted">Anonymous reflections from others on the same journey. You're not alone.</p>
+        <p className="muted">Real people, same journey. Anonymous — share freely.</p>
       </div>
+
+      {/* channel chips */}
+      <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.3rem" }}>
+        {CHANNELS.map((c) => (
+          <button
+            key={c.key}
+            className={active === c.key ? "" : "ghost"}
+            style={{ padding: "0.4rem 0.9rem", whiteSpace: "nowrap", fontSize: "0.85rem" }}
+            onClick={() => setActive(c.key)}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {active === "prompt" && prompt && (
+        <div className="card" style={{ borderColor: "var(--accent)" }}>
+          <div className="badge" style={{ color: "var(--accent)" }}>Today's prompt</div>
+          <p style={{ margin: "0.5rem 0 0", fontWeight: 600 }}>{prompt.text}</p>
+        </div>
+      )}
 
       <form className="card stack" onSubmit={post}>
         {error && <div className="error">{error}</div>}
@@ -49,7 +89,7 @@ export default function Community() {
           maxLength={1000}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Share a reflection, a win, or a tough moment… (anonymous)"
+          placeholder={active === "prompt" ? "Answer the prompt…" : `Share in ${active}… (anonymous)`}
         />
         <button type="submit" disabled={busy || !body.trim()}>
           {busy ? "Posting…" : "Share anonymously"}
@@ -58,13 +98,19 @@ export default function Community() {
 
       <div className="stack">
         {reflections.length === 0 && (
-          <div className="card muted">No reflections yet. Be the first to share.</div>
+          <div className="card muted">Nothing here yet. Be the first to share. 🌱</div>
         )}
         {reflections.map((r) => (
           <div key={r.id} className="card">
             <div className="row" style={{ justifyContent: "space-between" }}>
-              <span className="badge">🫂 Anonymous</span>
-              <span className="muted" style={{ fontSize: "0.75rem" }}>
+              <span className="row" style={{ gap: "0.5rem" }}>
+                <span style={{ fontSize: "1.3rem" }}>{r.author_avatar || "🫂"}</span>
+                <span className="badge">Anonymous</span>
+                {r.channel && r.channel !== "general" && (
+                  <span className="badge" style={{ color: "var(--brand)" }}>{r.channel}</span>
+                )}
+              </span>
+              <span className="muted" style={{ fontSize: "0.72rem" }}>
                 {r.milestone_label ? `${r.milestone_label} · ` : ""}{timeAgo(r.created_at)}
               </span>
             </div>
@@ -72,10 +118,7 @@ export default function Community() {
             <button
               className="ghost"
               style={{ fontSize: "0.7rem", padding: "0.3rem 0.7rem", marginTop: "0.6rem" }}
-              onClick={async () => {
-                await api.reportReflection(r.id).catch(() => {});
-                load();
-              }}
+              onClick={async () => { await api.reportReflection(r.id).catch(() => {}); load(); }}
               title="Report this reflection"
             >
               ⚐ Report

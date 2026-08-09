@@ -5,14 +5,14 @@
 import { query } from "./db.js";
 
 const DEMO_REFLECTIONS = [
-  "Day 3 was the worst but it does get easier. Hang in there 💪",
-  "The breathing thing actually works when a craving hits, not gonna lie.",
-  "Saved enough to buy new earbuds this month instead of pods. Worth it.",
-  "Nights are the hardest for me. Anyone else? You're not alone.",
-  "One week today. Never thought I'd make it this far.",
-  "My chest already feels less tight when I run. Small wins count.",
-  "Deleted the vape apps and unfollowed the accounts. Out of sight helps.",
-  "Told my best friend I'm quitting so they'd keep me accountable. Recommend it.",
+  { body: "Day 3 was the worst but it does get easier. Hang in there 💪", channel: "advice" },
+  { body: "The breathing thing actually works when a craving hits, not gonna lie.", channel: "cravings" },
+  { body: "Saved enough to buy new earbuds this month instead of pods. Worth it.", channel: "wins" },
+  { body: "Nights are the hardest for me. Anyone else? You're not alone.", channel: "vent" },
+  { body: "One week today. Never thought I'd make it this far.", channel: "wins" },
+  { body: "My chest already feels less tight when I run. Small wins count.", channel: "general" },
+  { body: "Deleted the vape apps and unfollowed the accounts. Out of sight helps.", channel: "advice" },
+  { body: "Told my best friend I'm quitting so they'd keep me accountable. Recommend it.", channel: "advice" },
 ];
 
 export async function seedDemoContent() {
@@ -38,10 +38,11 @@ export async function seedDemoContent() {
   if (existing[0].n > 0) return; // already seeded
 
   for (let i = 0; i < DEMO_REFLECTIONS.length; i++) {
+    const r = DEMO_REFLECTIONS[i];
     await query(
-      `INSERT INTO reflections (user_id, body, created_at)
-       VALUES ($1, $2, NOW() - ($3 || ' hours')::interval)`,
-      [demoId, DEMO_REFLECTIONS[i], i * 7]
+      `INSERT INTO reflections (user_id, body, channel, created_at)
+       VALUES ($1, $2, $3, NOW() - ($4 || ' hours')::interval)`,
+      [demoId, r.body, r.channel, i * 7]
     );
   }
   console.log(`Seeded ${DEMO_REFLECTIONS.length} demo reflections.`);

@@ -56,9 +56,18 @@ export const api = {
   getNotifications: () => request("/notifications"),
   markNotificationsRead: () => request("/notifications/read", { method: "POST" }),
 
-  getReflections: (milestoneId) =>
-    request(`/reflections${milestoneId ? `?milestoneId=${milestoneId}` : ""}`),
-  postReflection: (body, milestoneId) =>
-    request("/reflections", { method: "POST", body: { body, milestoneId } }),
+  getReflections: (params = {}) => {
+    const q = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null))
+    ).toString();
+    return request(`/reflections${q ? `?${q}` : ""}`);
+  },
+  postReflection: (body, opts = {}) =>
+    request("/reflections", { method: "POST", body: { body, ...opts } }),
   reportReflection: (id) => request(`/reflections/${id}/report`, { method: "POST" }),
+  getDailyPrompt: () => request("/reflections/prompt"),
+
+  getRewards: () => request("/rewards"),
+  unlockReward: (itemKey) => request("/rewards/unlock", { method: "POST", body: { itemKey } }),
+  selectReward: (itemKey) => request("/rewards/select", { method: "POST", body: { itemKey } }),
 };

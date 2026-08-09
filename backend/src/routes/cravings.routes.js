@@ -53,6 +53,8 @@ router.get("/stats", requireAuth, async (req, res) => {
   const { rows } = await query(
     `SELECT
         COUNT(*)::int AS total,
+        -- "beaten" = faced a craving and did NOT vape (passed or held on)
+        COUNT(*) FILTER (WHERE outcome <> 'vaped')::int AS beaten,
         COUNT(*) FILTER (WHERE outcome = 'passed')::int AS passed,
         COUNT(*) FILTER (WHERE occurred_at > NOW() - INTERVAL '7 days')::int AS last7
        FROM craving_events

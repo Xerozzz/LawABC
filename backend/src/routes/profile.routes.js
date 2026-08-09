@@ -15,6 +15,8 @@ const shapeProfile = (u) => ({
   consentLocation: u.consent_location,
   consentShare: u.consent_share,
   consentAcceptedAt: u.consent_accepted_at,
+  avatar: u.avatar,
+  theme: u.theme,
   onboarded: u.onboarded,
 });
 

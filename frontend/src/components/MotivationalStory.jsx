@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 
 // Seedable list of short motivational messages. Extend / move server-side later.
 const STORIES = [
-  "This craving is a wave. Waves rise, crest, and always fall. You just have to float for a minute.",
-  "Your lungs are already thanking you. Every hour without vaping, they heal a little more.",
-  "You are not giving something up — you're taking your health, money, and freedom back.",
-  "The urge feels loud, but it's temporary. You are stronger and you last longer than it does.",
-  "Think of what you're saving for. That reward gets closer every time you say no.",
-  "You've beaten cravings before. This is just one more, and you already know how it ends.",
+  "This craving is a wave. It's peaking right now — give it 90 seconds and it drops. You just have to float, not fight.",
+  "You don't have to quit forever right this second. You just have to get through the next minute. That's it. You've got this one.",
+  "Nobody 'needs' a vape. That's the nicotine talking, not you. Wait it out and watch it get quieter.",
+  "Real talk: you've said no before and survived every time. Your record against cravings is basically perfect.",
+  "Think about future-you, waking up tomorrow proud they didn't cave tonight. Be that person's reason.",
+  "It's okay that this is hard. Hard isn't the same as impossible — and you're already doing the hard part right now.",
 ];
 
 export default function MotivationalStory({ onDone }) {

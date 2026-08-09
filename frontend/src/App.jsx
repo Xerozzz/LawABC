@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext.jsx";
+import { applyTheme } from "./themes.js";
 import Layout from "./components/Layout.jsx";
 import AuthScreen from "./screens/AuthScreen.jsx";
 import Consent from "./screens/Consent.jsx";
@@ -13,10 +15,16 @@ import Community from "./screens/Community.jsx";
 import TriggerMap from "./screens/TriggerMap.jsx";
 import Notifications from "./screens/Notifications.jsx";
 import Privacy from "./screens/Privacy.jsx";
+import Shop from "./screens/Shop.jsx";
 import Profile from "./screens/Profile.jsx";
 
 export default function App() {
   const { user, loading } = useAuth();
+
+  // Apply the user's chosen theme (falls back to default when logged out).
+  useEffect(() => {
+    applyTheme(user?.theme || "default");
+  }, [user?.theme]);
 
   if (loading) {
     return <div className="center-screen muted">Loading ClearAir…</div>;
@@ -38,6 +46,7 @@ export default function App() {
         <Route path="/triggers" element={<TriggerMap />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/shop" element={<Shop />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/profile" element={<Profile />} />
       </Route>

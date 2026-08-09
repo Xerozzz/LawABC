@@ -29,6 +29,7 @@ export default function TriggerMap() {
   const [cravings, setCravings] = useState([]);
   const [warning, setWarning] = useState(null);
   const [error, setError] = useState("");
+  const [denied, setDenied] = useState(false);
 
   // Load craving events that have coordinates.
   useEffect(() => {
@@ -90,8 +91,9 @@ export default function TriggerMap() {
   // Locate the user and warn if near a past trigger spot.
   const checkMyLocation = () => {
     setError("");
+    setDenied(false);
     if (!("geolocation" in navigator)) {
-      setError("Location isn't available on this device/browser.");
+      setError("Location isn't available on this device or browser.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -113,7 +115,11 @@ export default function TriggerMap() {
         const near = cravings.some((c) => metresBetween(here, [c.lat, c.lng]) < TRIGGER_RADIUS_M);
         setWarning(near);
       },
-      () => setError("Couldn't get your location. Check permissions."),
+      (err) => {
+        // 1 = PERMISSION_DENIED. Browsers won't let us open settings, so guide instead.
+        if (err.code === 1) setDenied(true);
+        else setError("Couldn't get your location. Please try again.");
+      },
       { timeout: 6000, enableHighAccuracy: true }
     );
   };
@@ -128,6 +134,18 @@ export default function TriggerMap() {
       </div>
 
       {error && <div className="error">{error}</div>}
+
+      {denied && (
+        <div className="error" style={{ background: "rgba(255,183,3,0.12)", borderColor: "var(--accent)", color: "#ffe9b8" }}>
+          <strong>Location is switched off for ClearAir.</strong>
+          <p style={{ margin: "0.4rem 0 0", fontSize: "0.85rem" }}>
+            To use this, enable location for this site:
+            tap the <strong>🔒 / ⓘ icon</strong> in your browser's address bar → <strong>Permissions</strong> →
+            allow <strong>Location</strong>, then tap the button again. On iPhone, also check
+            Settings → the browser app → Location.
+          </p>
+        </div>
+      )}
 
       {warning === true && (
         <div className="error">

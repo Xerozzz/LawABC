@@ -34,8 +34,8 @@ export default function Onboarding() {
 
   return (
     <div className="center-screen">
-      <h1 className="h1">Let's set you up 🎯</h1>
-      <p className="muted">A few quick things to personalise your journey.</p>
+      <h1 className="h1">First, a few quick things 🎯</h1>
+      <p className="muted">So we can cheer you on properly — this takes 30 seconds.</p>
 
       <form className="card stack" onSubmit={submit} style={{ marginTop: "1rem" }}>
         {error && <div className="error">{error}</div>}

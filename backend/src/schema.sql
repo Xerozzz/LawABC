@@ -12,11 +12,23 @@ CREATE TABLE IF NOT EXISTS users (
   consent_location     BOOLEAN DEFAULT FALSE,
   consent_share        BOOLEAN DEFAULT FALSE,
   consent_accepted_at  TIMESTAMPTZ,
+  avatar          TEXT DEFAULT '🌱',
+  theme           TEXT DEFAULT 'default',
   onboarded       BOOLEAN DEFAULT FALSE,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
--- Migration for DBs created before consent tracking existed.
+-- Migrations for columns added after initial launch.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS consent_accepted_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '🌱';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS theme  TEXT DEFAULT 'default';
+
+-- Cosmetic items a user has unlocked with gems (avatars, themes).
+CREATE TABLE IF NOT EXISTS unlocks (
+  user_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  item_key   TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, item_key)
+);
 
 -- Reference data: researched health-recovery milestones.
 -- NOTE: currently seeded with SMOKING cessation data as a placeholder.
@@ -57,8 +69,12 @@ CREATE TABLE IF NOT EXISTS reflections (
   milestone_id    INT REFERENCES health_milestones(id) ON DELETE SET NULL,
   body            TEXT NOT NULL,
   status          TEXT NOT NULL DEFAULT 'visible',  -- 'visible' | 'hidden'
+  channel         TEXT NOT NULL DEFAULT 'general',  -- topic channel
+  prompt_id       TEXT,                             -- daily-prompt id if a response
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE reflections ADD COLUMN IF NOT EXISTS channel   TEXT NOT NULL DEFAULT 'general';
+ALTER TABLE reflections ADD COLUMN IF NOT EXISTS prompt_id TEXT;
 
 -- Lightweight product analytics (screen views + key actions) for the pilot.
 CREATE TABLE IF NOT EXISTS events (

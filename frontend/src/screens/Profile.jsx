@@ -46,10 +46,15 @@ export default function Profile() {
 
   return (
     <div className="stack">
-      <div>
-        <h1 className="h1">Profile 👤</h1>
-        <p className="muted">{user.email}</p>
+      <div className="row" style={{ gap: "0.8rem" }}>
+        <span style={{ fontSize: "2.4rem" }}>{user.avatar || "🌱"}</span>
+        <div>
+          <h1 className="h1" style={{ margin: 0 }}>Profile 👤</h1>
+          <p className="muted" style={{ margin: 0 }}>{user.email}</p>
+        </div>
       </div>
+
+      <Link to="/shop"><button className="accent" style={{ width: "100%" }}>🎁 Rewards, avatars &amp; themes</button></Link>
 
       <form className="card stack" onSubmit={save}>
         {error && <div className="error">{error}</div>}

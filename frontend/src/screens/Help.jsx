@@ -12,6 +12,19 @@ const CRISIS = [
   { name: "IMH Mental Health Helpline", detail: "24-hour, all ages", tel: "6389 2222", href: "tel:+6563892222" },
 ];
 
+// TODO: replace with your actual programme / school-counsellor contact before the pilot.
+const PROGRAMME = {
+  name: "Your ClearAir programme team",
+  detail: "Tap to reach the people running this with you",
+  contact: "hello@example.org",
+  href: "mailto:hello@example.org",
+};
+
+// Curated, vetted stories — extend with links your team has reviewed (no random content).
+const STORIES = [
+  { name: "This Is Quitting (Truth Initiative)", detail: "Real young people on quitting vaping", href: "https://truthinitiative.org/thisisquitting" },
+];
+
 function ResourceCard({ r }) {
   return (
     <a href={r.href} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
@@ -47,6 +60,21 @@ export default function Help() {
 
       <h3 style={{ margin: "0.5rem 0 0" }}>Feeling overwhelmed?</h3>
       {CRISIS.map((r) => <ResourceCard key={r.name} r={r} />)}
+
+      <h3 style={{ margin: "0.5rem 0 0" }}>Your programme team</h3>
+      <a href={PROGRAMME.href} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <strong>{PROGRAMME.name}</strong>
+        <div className="muted" style={{ fontSize: "0.82rem" }}>{PROGRAMME.detail}</div>
+        <div className="badge" style={{ color: "var(--brand)", marginTop: "0.4rem" }}>✉️ {PROGRAMME.contact}</div>
+      </a>
+
+      <h3 style={{ margin: "0.5rem 0 0" }}>Real stories</h3>
+      {STORIES.map((r) => (
+        <a key={r.name} href={r.href} target="_blank" rel="noopener noreferrer" className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <strong>{r.name}</strong>
+          <div className="muted" style={{ fontSize: "0.82rem" }}>{r.detail} ↗</div>
+        </a>
+      ))}
 
       <p className="muted" style={{ fontSize: "0.75rem" }}>
         ClearAir provides support and general information, not medical advice or crisis counselling.

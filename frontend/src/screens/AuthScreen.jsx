@@ -28,7 +28,7 @@ export default function AuthScreen() {
       <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
         <div style={{ fontSize: "3rem" }}>🌬️</div>
         <h1 className="h1">ClearAir</h1>
-        <p className="muted">Your always-there support to quit vaping.</p>
+        <p className="muted">The friend in your pocket for quitting vape. No lectures, no judgement.</p>
       </div>
 
       <form className="card stack" onSubmit={submit}>
@@ -78,7 +78,7 @@ export default function AuthScreen() {
         </button>
       </form>
       <p className="muted" style={{ fontSize: "0.75rem", textAlign: "center", marginTop: "1rem" }}>
-        Anonymous &amp; judgement-free. Your data stays private.
+        Private and judgement-free. You're not in this alone. 💚
       </p>
     </div>
   );
