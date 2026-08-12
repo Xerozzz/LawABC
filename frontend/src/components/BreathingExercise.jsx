@@ -12,9 +12,11 @@ const TOTAL = 60;
 export default function BreathingExercise({ onDone }) {
   const [remaining, setRemaining] = useState(TOTAL);
   const [phaseIdx, setPhaseIdx] = useState(0);
+  const [phaseCount, setPhaseCount] = useState(PHASE_SECS);
   const [sound, setSound] = useState(false);
   const tick = useRef(0);
   const audioCtx = useRef(null);
+  const drone = useRef(null);
 
   // Play a soft tone cue for the current phase (no audio files needed).
   const playCue = (freq) => {
@@ -33,12 +35,43 @@ export default function BreathingExercise({ onDone }) {
     osc.stop(now + PHASE_SECS);
   };
 
+  // Continuous calm background pad: two softly-detuned low sines.
+  const startDrone = () => {
+    const ctx = audioCtx.current;
+    if (!ctx || drone.current) return;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 1.5);
+    gain.connect(ctx.destination);
+    const oscs = [110, 110.7].map((f) => {
+      const o = ctx.createOscillator();
+      o.type = "sine";
+      o.frequency.value = f;
+      o.connect(gain);
+      o.start();
+      return o;
+    });
+    drone.current = { oscs, gain };
+  };
+
+  const stopDrone = () => {
+    const d = drone.current;
+    if (!d) return;
+    const ctx = audioCtx.current;
+    d.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+    d.oscs.forEach((o) => o.stop(ctx.currentTime + 0.5));
+    drone.current = null;
+  };
+
+  useEffect(() => stopDrone, []); // silence the pad if we leave mid-exercise
+
   useEffect(() => {
     const id = setInterval(() => {
       tick.current += 1;
       setRemaining(Math.max(0, TOTAL - tick.current));
       const idx = Math.floor(tick.current / PHASE_SECS) % PHASES.length;
       setPhaseIdx(idx);
+      setPhaseCount(PHASE_SECS - (tick.current % PHASE_SECS));
       if (sound && tick.current % PHASE_SECS === 0) playCue(PHASES[idx].freq);
       if (tick.current >= TOTAL) {
         clearInterval(id);
@@ -56,6 +89,9 @@ export default function BreathingExercise({ onDone }) {
         audioCtx.current || new (window.AudioContext || window.webkitAudioContext)();
       audioCtx.current.resume?.();
       playCue(PHASES[phaseIdx].freq);
+      startDrone();
+    } else {
+      stopDrone();
     }
     setSound((s) => !s);
   };
@@ -68,6 +104,9 @@ export default function BreathingExercise({ onDone }) {
       <p className="muted">Follow the circle · {remaining}s left</p>
 
       <div style={{ position: "relative", width: 240, height: 240, margin: "1.5rem auto" }}>
+        {/* soft ripples radiating out to guide the rhythm */}
+        <span className="breath-ripple" style={{ animationDelay: "0s" }} />
+        <span className="breath-ripple" style={{ animationDelay: "2s" }} />
         {/* progress ring */}
         <svg viewBox="0 0 240 240" style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}>
           <circle cx="120" cy="120" r="112" fill="none" stroke="var(--surface-2)" strokeWidth="8" />
@@ -87,16 +126,17 @@ export default function BreathingExercise({ onDone }) {
             boxShadow: "0 0 40px rgba(23,195,178,0.5)",
             transform: `scale(${phase.scale})`,
             transition: `transform ${PHASE_SECS}s ease-in-out`,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             color: "#06231f", fontWeight: 800, fontSize: "1.15rem",
           }}
         >
-          {phase.label}
+          <span>{phase.label}</span>
+          <span style={{ fontSize: "1.8rem", lineHeight: 1.1 }}>{phaseCount}</span>
         </div>
       </div>
 
       <button className="ghost" onClick={toggleSound} style={{ padding: "0.5rem 1rem" }}>
-        {sound ? "🔊 Sound on" : "🔈 Sound off"}
+        {sound ? "🎵 Calm audio on" : "🔈 Play calm audio"}
       </button>
     </div>
   );

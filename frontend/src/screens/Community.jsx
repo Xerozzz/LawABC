@@ -12,11 +12,19 @@ function timeAgo(iso) {
 const CHANNELS = [
   { key: "prompt", label: "🌟 Today's prompt" },
   { key: "general", label: "General" },
+  { key: "sports", label: "⚽ Sports & jio" },
+  { key: "events", label: "📅 Events" },
   { key: "cravings", label: "Cravings" },
   { key: "wins", label: "Wins" },
   { key: "advice", label: "Advice" },
   { key: "vent", label: "Vent" },
 ];
+
+// A little nudge on what each channel is for.
+const CHANNEL_HINTS = {
+  sports: "Jio people for a run, ball game, gym sesh — drop a time and place.",
+  events: "Post community events here and sign up together — going with someone makes it easier.",
+};
 
 export default function Community() {
   const [active, setActive] = useState("prompt");
@@ -58,7 +66,7 @@ export default function Community() {
     <div className="stack">
       <div>
         <h1 className="h1">Community 💬</h1>
-        <p className="muted">Real people, same journey. Anonymous — share freely.</p>
+        <p className="muted">People who get it. No names, no judgement — say what's real.</p>
       </div>
 
       {/* channel chips */}
@@ -82,6 +90,12 @@ export default function Community() {
         </div>
       )}
 
+      {CHANNEL_HINTS[active] && (
+        <div className="card muted" style={{ padding: "0.8rem 1rem", fontSize: "0.85rem" }}>
+          {CHANNEL_HINTS[active]}
+        </div>
+      )}
+
       <form className="card stack" onSubmit={post}>
         {error && <div className="error">{error}</div>}
         <textarea
@@ -89,7 +103,12 @@ export default function Community() {
           maxLength={1000}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder={active === "prompt" ? "Answer the prompt…" : `Share in ${active}… (anonymous)`}
+          placeholder={
+            active === "prompt" ? "Answer the prompt…"
+            : active === "sports" ? "Jio: what, when, where?"
+            : active === "events" ? "What's happening? Who's in?"
+            : `Say it in ${active}… (anonymous)`
+          }
         />
         <button type="submit" disabled={busy || !body.trim()}>
           {busy ? "Posting…" : "Share anonymously"}

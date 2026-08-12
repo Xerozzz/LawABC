@@ -8,10 +8,12 @@ export default function Home() {
   const { user } = useAuth();
   const [savings, setSavings] = useState(null);
   const [milestones, setMilestones] = useState(null);
+  const [cravingStats, setCravingStats] = useState(null);
 
   useEffect(() => {
     api.getSavings().then(setSavings).catch(() => {});
     api.getMilestones().then(setMilestones).catch(() => {});
+    api.getCravingStats().then(setCravingStats).catch(() => {});
   }, []);
 
   const days = savings?.daysQuit ?? 0;
@@ -40,6 +42,18 @@ export default function Home() {
         <div className="muted" style={{ color: "#3d6a86", fontSize: "0.85rem", marginTop: "0.2rem" }}>Vape-free for</div>
         <div className="big">{days} <span style={{ fontSize: "1.1rem", fontWeight: 700 }}>day{days === 1 ? "" : "s"}</span></div>
         <TreeGrowth days={days} />
+      </div>
+
+      {/* cravings beaten — "passed" and "held on" both count */}
+      <div className="card row" style={{ justifyContent: "space-between" }}>
+        <div className="row" style={{ gap: "0.7rem" }}>
+          <span className="metric-ico" style={{ background: "#ffecec" }}>💪</span>
+          <div>
+            <strong>Cravings beaten</strong>
+            <div className="muted" style={{ fontSize: "0.8rem" }}>holding on counts too</div>
+          </div>
+        </div>
+        <strong style={{ color: "var(--danger)", fontSize: "1.3rem" }}>{cravingStats?.beaten ?? 0}</strong>
       </div>
 
       {/* health recovery */}
@@ -99,6 +113,31 @@ export default function Home() {
           <strong>Trigger map</strong>
         </div>
         <span className="muted">›</span>
+      </Link>
+
+      {/* rewards nudge */}
+      <Link to="/shop" className="card row" style={{ textDecoration: "none", color: "inherit", justifyContent: "space-between" }}>
+        <div className="row" style={{ gap: "0.7rem" }}>
+          <span className="metric-ico" style={{ backgroundColor: "#fff4d9" }}>💎</span>
+          <div>
+            <strong>Gems &amp; rewards</strong>
+            <div className="muted" style={{ fontSize: "0.8rem" }}>earn from streaks + beating cravings</div>
+          </div>
+        </div>
+        <span className="muted">›</span>
+      </Link>
+
+      {/* need more support — reach the team behind the app or a helpline */}
+      <Link to="/help" className="card" style={{ textDecoration: "none", color: "inherit", background: "linear-gradient(135deg,#e7f8f2,#ffffff)" }}>
+        <div className="row" style={{ gap: "0.7rem" }}>
+          <span className="metric-ico" style={{ background: "#d6f3e9" }}>🤝</span>
+          <div>
+            <strong>Need more support?</strong>
+            <div className="muted" style={{ fontSize: "0.8rem" }}>
+              Talk to the ClearAir team or a helpline — real humans, free and confidential.
+            </div>
+          </div>
+        </div>
       </Link>
     </div>
   );

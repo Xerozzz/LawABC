@@ -30,6 +30,11 @@ export default function TriggerMap() {
   const [warning, setWarning] = useState(null);
   const [error, setError] = useState("");
   const [denied, setDenied] = useState(false);
+  const [watching, setWatching] = useState(false);
+  const watchId = useRef(null);
+  const lastAlert = useRef(0);
+  const cravingsRef = useRef([]);
+  useEffect(() => { cravingsRef.current = cravings; }, [cravings]);
 
   // Load craving events that have coordinates.
   useEffect(() => {
@@ -37,6 +42,23 @@ export default function TriggerMap() {
       .getCravings()
       .then((rows) => setCravings(rows.filter((r) => r.lat != null && r.lng != null)))
       .catch((e) => setError(e.message));
+  }, []);
+
+  // Show the how-to-re-enable guidance straight away if location is already blocked,
+  // instead of waiting for a failed click.
+  useEffect(() => {
+    navigator.permissions
+      ?.query({ name: "geolocation" })
+      .then((status) => {
+        if (status.state === "denied") setDenied(true);
+        status.onchange = () => setDenied(status.state === "denied");
+      })
+      .catch(() => {});
+  }, []);
+
+  // Stop watching when leaving the screen.
+  useEffect(() => () => {
+    if (watchId.current != null) navigator.geolocation.clearWatch(watchId.current);
   }, []);
 
   // Initialise the map once.
@@ -88,18 +110,27 @@ export default function TriggerMap() {
     }
   }, [cravings]);
 
-  // Locate the user and warn if near a past trigger spot.
-  const checkMyLocation = () => {
+  // Guard shared by one-off checks and the live watcher.
+  const geoAvailable = () => {
     setError("");
-    setDenied(false);
     if (!window.isSecureContext) {
       setError("Live location needs a secure (https) connection — it'll work once the site is on https.");
-      return;
+      return false;
     }
     if (!("geolocation" in navigator)) {
       setError("Location isn't available on this device or browser.");
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const nearTrigger = (here) =>
+    cravingsRef.current.some((c) => metresBetween(here, [c.lat, c.lng]) < TRIGGER_RADIUS_M);
+
+  // Locate the user and warn if near a past trigger spot.
+  const checkMyLocation = () => {
+    setDenied(false);
+    if (!geoAvailable()) return;
     navigator.geolocation.getCurrentPosition(
       (p) => {
         const here = [p.coords.latitude, p.coords.longitude];
@@ -116,8 +147,7 @@ export default function TriggerMap() {
             .addTo(meLayer.current);
           map.setView(here, 15);
         }
-        const near = cravings.some((c) => metresBetween(here, [c.lat, c.lng]) < TRIGGER_RADIUS_M);
-        setWarning(near);
+        setWarning(nearTrigger(here));
       },
       (err) => {
         // 1 = PERMISSION_DENIED. Browsers won't let us open settings, so guide instead.
@@ -126,6 +156,46 @@ export default function TriggerMap() {
       },
       { timeout: 6000, enableHighAccuracy: true }
     );
+  };
+
+  // Live reminder while the app is open: watch position and nudge when entering
+  // a trigger zone. (Background geofencing needs a native app — noted as WIP.)
+  const toggleWatch = () => {
+    if (watching) {
+      if (watchId.current != null) navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
+      setWatching(false);
+      return;
+    }
+    if (!geoAvailable()) return;
+    // Ask for device-notification permission so the nudge shows even when
+    // you're in another tab (must come from this user gesture).
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+    watchId.current = navigator.geolocation.watchPosition(
+      (p) => {
+        const here = [p.coords.latitude, p.coords.longitude];
+        const near = nearTrigger(here);
+        setWarning(near);
+        // Nudge at most once every 10 minutes.
+        if (near && Date.now() - lastAlert.current > 10 * 60 * 1000) {
+          lastAlert.current = Date.now();
+          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            new Notification("Heads up 📍", {
+              body: "You're near a spot where a craving hit before. Got a plan? Craving SOS is one tap away.",
+            });
+          }
+        }
+      },
+      (err) => {
+        if (err.code === 1) setDenied(true);
+        setWatching(false);
+        watchId.current = null;
+      },
+      { enableHighAccuracy: true }
+    );
+    setWatching(true);
   };
 
   return (
@@ -140,13 +210,13 @@ export default function TriggerMap() {
       {error && <div className="error">{error}</div>}
 
       {denied && (
-        <div className="error" style={{ background: "rgba(255,183,3,0.12)", borderColor: "var(--accent)", color: "#ffe9b8" }}>
+        <div className="error" style={{ background: "rgba(255,183,3,0.14)", borderColor: "var(--accent)", color: "#7a5b00" }}>
           <strong>Location is switched off for ClearAir.</strong>
           <p style={{ margin: "0.4rem 0 0", fontSize: "0.85rem" }}>
-            To use this, enable location for this site:
-            tap the <strong>🔒 / ⓘ icon</strong> in your browser's address bar → <strong>Permissions</strong> →
+            Browsers don't let apps open settings for you, so it's a quick manual step:
+            tap the <strong>🔒 / ⓘ icon</strong> in the address bar → <strong>Permissions</strong> →
             allow <strong>Location</strong>, then tap the button again. On iPhone, also check
-            Settings → the browser app → Location.
+            Settings → your browser app → Location.
           </p>
         </div>
       )}
@@ -174,6 +244,14 @@ export default function TriggerMap() {
       />
 
       <button onClick={checkMyLocation}>📍 Check where I am now</button>
+
+      <button className={watching ? "" : "ghost"} onClick={toggleWatch}>
+        {watching ? "🔔 Nearby reminders on — tap to stop" : "🔕 Remind me near trigger spots"}
+      </button>
+      <p className="muted" style={{ fontSize: "0.75rem", margin: "-0.4rem 0 0" }}>
+        Reminders work while the app is open. Always-on background alerts need the
+        installed app version — coming later. 🚧
+      </p>
 
       {cravings.length === 0 && (
         <div className="card muted">

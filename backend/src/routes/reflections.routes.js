@@ -5,7 +5,7 @@ import { requireAuth } from "../auth.js";
 const router = Router();
 
 // Topic channels (online-only). Keep this list in sync with the frontend.
-export const CHANNELS = ["general", "cravings", "wins", "advice", "vent"];
+export const CHANNELS = ["general", "sports", "events", "cravings", "wins", "advice", "vent"];
 
 // Rotating daily prompts. Deterministic by date so everyone sees the same one.
 const PROMPTS = [

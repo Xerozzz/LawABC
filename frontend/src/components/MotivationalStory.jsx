@@ -10,6 +10,13 @@ const STORIES = [
   "It's okay that this is hard. Hard isn't the same as impossible — and you're already doing the hard part right now.",
 ];
 
+// Vetted links to people who actually got out of the cycle — not just quotes.
+const REAL_STORIES = [
+  { label: "Teens on quitting vaping (FDA videos)", href: "https://digitalmedia.hhs.gov/tobacco/educator_hub/lesson-plans/risks-vaping-magazine/my-vaping-mistake-videos" },
+  { label: "This Is Quitting — real young quitters", href: "https://truthinitiative.org/thisisquitting" },
+  { label: "I Quit programme (HealthHub SG)", href: "https://www.healthhub.sg/programmes/iquit" },
+];
+
 export default function MotivationalStory({ onDone }) {
   const [idx, setIdx] = useState(0);
   const [remaining, setRemaining] = useState(60);
@@ -40,6 +47,26 @@ export default function MotivationalStory({ onDone }) {
       <button className="ghost" onClick={() => setIdx((i) => (i + 1) % STORIES.length)}>
         Another one →
       </button>
+
+      <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
+        <p className="muted" style={{ fontSize: "0.8rem", margin: "0 0 0.4rem" }}>
+          People who actually got out of it:
+        </p>
+        <div className="stack" style={{ gap: "0.5rem" }}>
+          {REAL_STORIES.map((s) => (
+            <a
+              key={s.href}
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card"
+              style={{ textDecoration: "none", color: "inherit", padding: "0.7rem 0.9rem", fontSize: "0.85rem", fontWeight: 600 }}
+            >
+              {s.label} ↗
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,11 +2,13 @@ import { useState } from "react";
 import MiniGame from "./MiniGame.jsx";
 import Game2048 from "./Game2048.jsx";
 import FlappyGame from "./FlappyGame.jsx";
+import MemoryGame from "./MemoryGame.jsx";
 
 const GAMES = [
   { key: "tap", label: "Tap Rush", icon: "🎯", Comp: MiniGame },
   { key: "2048", label: "2048", icon: "🔢", Comp: Game2048 },
   { key: "flappy", label: "Flappy", icon: "🐦", Comp: FlappyGame },
+  { key: "memory", label: "Memory", icon: "🃏", Comp: MemoryGame },
 ];
 
 export default function GamePicker({ onDone }) {

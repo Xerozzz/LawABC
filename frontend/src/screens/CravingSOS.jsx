@@ -5,11 +5,13 @@ import { useAuth } from "../AuthContext.jsx";
 import BreathingExercise from "../components/BreathingExercise.jsx";
 import GamePicker from "../components/GamePicker.jsx";
 import MotivationalStory from "../components/MotivationalStory.jsx";
+import RandomVideo from "../components/RandomVideo.jsx";
 
 const TOOLS = [
   { key: "breathing", icon: "🫁", label: "Breathe", desc: "60-second guided breathing" },
-  { key: "game", icon: "🎮", label: "Distract", desc: "Mini-games: Tap, 2048 or Flappy" },
-  { key: "story", icon: "📖", label: "Get inspired", desc: "A short motivational story" },
+  { key: "game", icon: "🎮", label: "Play", desc: "Tap, 2048, Flappy or Memory" },
+  { key: "video", icon: "📺", label: "Watch", desc: "A random chill video" },
+  { key: "story", icon: "📖", label: "Real talk", desc: "Words + real quit stories" },
 ];
 
 export default function CravingSOS() {
@@ -63,13 +65,14 @@ export default function CravingSOS() {
               You've<br />got this
             </div>
             <h1 className="h1">Craving SOS</h1>
-            <p className="muted">Urges peak and fade in a few minutes. Pick a 60-second activity.</p>
+            <p className="muted">Cravings peak, then fade — ride this one out. Pick something for a minute.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "0.7rem", marginTop: "0.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "0.7rem", marginTop: "0.5rem" }}>
             {TOOLS.map((t) => (
-              <button key={t.key} className="ghost" style={{ padding: "1rem 0.4rem", display: "flex", flexDirection: "column", gap: "0.35rem" }} onClick={() => start(t.key)}>
+              <button key={t.key} className="ghost" style={{ padding: "1rem 0.4rem", display: "flex", flexDirection: "column", gap: "0.35rem", alignItems: "center" }} onClick={() => start(t.key)}>
                 <span style={{ fontSize: "1.8rem" }}>{t.icon}</span>
                 <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{t.label}</span>
+                <span className="muted" style={{ fontSize: "0.68rem" }}>{t.desc}</span>
               </button>
             ))}
           </div>
@@ -80,6 +83,7 @@ export default function CravingSOS() {
         <>
           {tool === "breathing" && <BreathingExercise onDone={() => setStep("checkin")} />}
           {tool === "game" && <GamePicker onDone={() => setStep("checkin")} />}
+          {tool === "video" && <RandomVideo />}
           {tool === "story" && <MotivationalStory onDone={() => setStep("checkin")} />}
           <button className="ghost" style={{ marginTop: "1.5rem" }} onClick={() => setStep("checkin")}>
             I'm done
@@ -90,7 +94,7 @@ export default function CravingSOS() {
       {step === "checkin" && (
         <>
           <h1 className="h1">How'd that go?</h1>
-          <p className="muted">No judgement either way — this just helps you spot your patterns.</p>
+          <p className="muted">Be honest — no one's judging. It just helps you spot your patterns.</p>
           <div className="stack" style={{ marginTop: "1rem" }}>
             <button onClick={() => finishAndLog("passed")}>😌 The craving passed</button>
             <button className="ghost" onClick={() => finishAndLog("held")}>😤 Still tough, but I held on</button>

@@ -15,7 +15,7 @@ const CRISIS = [
 // TODO: replace with your actual programme / school-counsellor contact before the pilot.
 const PROGRAMME = {
   name: "Your ClearAir programme team",
-  detail: "Tap to reach the people running this with you",
+  detail: "The people running this with you — message us anytime, we actually reply",
   contact: "hello@example.org",
   href: "mailto:hello@example.org",
 };
@@ -48,11 +48,11 @@ export default function Help() {
         <button className="ghost" style={{ padding: "0.4rem 0.8rem" }} onClick={() => navigate(-1)}>Back</button>
       </div>
       <p className="muted" style={{ marginTop: 0 }}>
-        Reaching out is a strength. Real people are ready to support you — free and confidential.
+        Real humans, free and confidential. Reaching out counts as a win.
       </p>
 
       <div className="error" style={{ background: "rgba(255,93,93,0.12)" }}>
-        <strong>In immediate danger?</strong> Call <a href="tel:995" style={{ color: "#ffd5d5" }}>995</a> (emergency) right away.
+        <strong>In immediate danger?</strong> Call <a href="tel:995" style={{ color: "#b3213a", fontWeight: 700 }}>995</a> (emergency) right away.
       </div>
 
       <h3 style={{ margin: "0.5rem 0 0" }}>Quitting support</h3>
