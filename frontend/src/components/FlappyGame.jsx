@@ -13,17 +13,19 @@ export default function FlappyGame() {
   const [started, setStarted] = useState(false);
 
   const reset = () => {
-    state.current = { y: H / 2, vy: 0, pipes: [], t: 0, score: 0, dead: false };
+    state.current = { y: H / 2, vy: 0, pipes: [], t: 0, score: 0, dead: false, started: false };
     setScore(0); setOver(false); setStarted(false);
   };
 
   const flap = () => {
     const s = state.current;
     if (s.dead) { reset(); return; }
-    if (!started) setStarted(true);
+    if (!s.started) { s.started = true; setStarted(true); }
     s.vy = FLAP;
   };
 
+  // Runs once: the loop reads game state (incl. started) from the ref, so
+  // starting doesn't re-run the effect (which used to reset the game instantly).
   useEffect(() => {
     reset();
     const ctx = canvasRef.current.getContext("2d");
@@ -52,7 +54,7 @@ export default function FlappyGame() {
 
     const step = () => {
       const s = state.current;
-      if (started && !s.dead) {
+      if (s.started && !s.dead) {
         s.vy += GRAVITY;
         s.y += s.vy;
         s.t++;
@@ -78,7 +80,7 @@ export default function FlappyGame() {
     raf.current = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [started]);
+  }, []);
 
   return (
     <div style={{ textAlign: "center", width: "100%" }}>

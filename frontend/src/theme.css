@@ -11,6 +11,10 @@
   --purple: #8b7bf0;
   --danger: #ff5a6a;
   --success: #22b07d;
+  --hero-1: #bfe4ff;
+  --hero-2: #dff1ff;
+  --hero-3: #eafaf1;
+  --hero-border: #cfe8fb;
   --radius: 20px;
   --shadow: 0 10px 30px rgba(23, 58, 110, 0.08);
   --shadow-sm: 0 4px 14px rgba(23, 58, 110, 0.06);
@@ -125,8 +129,8 @@ a { color: var(--brand); }
 /* Hero progress card with sky gradient */
 .hero {
   border-radius: 26px; padding: 1.3rem 1.3rem 0;
-  background: linear-gradient(180deg, #bfe4ff 0%, #dff1ff 55%, #eafaf1 100%);
-  border: 1px solid #cfe8fb; overflow: hidden; box-shadow: var(--shadow);
+  background: linear-gradient(180deg, var(--hero-1) 0%, var(--hero-2) 55%, var(--hero-3) 100%);
+  border: 1px solid var(--hero-border); overflow: hidden; box-shadow: var(--shadow);
   color: #10384f;
 }
 .hero .big { font-size: 2.6rem; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
@@ -136,7 +140,7 @@ a { color: var(--brand); }
   position: sticky; top: 0; z-index: 15;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.7rem 1.1rem;
-  background: rgba(238, 243, 249, 0.85);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }

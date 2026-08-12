@@ -124,7 +124,7 @@ export default function Community() {
             <div className="row" style={{ justifyContent: "space-between" }}>
               <span className="row" style={{ gap: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>{r.author_avatar || "🫂"}</span>
-                <span className="badge">Anonymous</span>
+                <span className="badge">{r.author_name || "Anonymous"}</span>
                 {r.channel && r.channel !== "general" && (
                   <span className="badge" style={{ color: "var(--brand)" }}>{r.channel}</span>
                 )}
@@ -134,14 +134,25 @@ export default function Community() {
               </span>
             </div>
             <p style={{ margin: "0.6rem 0 0" }}>{r.body}</p>
-            <button
-              className="ghost"
-              style={{ fontSize: "0.7rem", padding: "0.3rem 0.7rem", marginTop: "0.6rem" }}
-              onClick={async () => { await api.reportReflection(r.id).catch(() => {}); load(); }}
-              title="Report this reflection"
-            >
-              ⚐ Report
-            </button>
+            <div className="row" style={{ marginTop: "0.6rem", gap: "0.5rem" }}>
+              {(r.channel === "sports" || r.channel === "events") && (
+                <button
+                  className={r.joined ? "" : "ghost"}
+                  style={{ fontSize: "0.7rem", padding: "0.3rem 0.7rem" }}
+                  onClick={async () => { await api.joinReflection(r.id).catch(() => {}); load(); }}
+                >
+                  🙋 {r.joined ? "You're in" : "I'm in!"}{r.joins > 0 ? ` · ${r.joins}` : ""}
+                </button>
+              )}
+              <button
+                className="ghost"
+                style={{ fontSize: "0.7rem", padding: "0.3rem 0.7rem" }}
+                onClick={async () => { await api.reportReflection(r.id).catch(() => {}); load(); }}
+                title="Report this reflection"
+              >
+                ⚐ Report
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -26,8 +26,11 @@ export default function Shop() {
     setError(""); setMsg("");
     try {
       await api.unlockReward(item.key);
-      setMsg(`Unlocked ${item.label}! 🎉`);
+      // Apply it right away — paying gems and seeing nothing change feels like a scam.
+      await api.selectReward(item.key);
+      setMsg(`Unlocked ${item.label} — switched on! 🎉`);
       await load();
+      await refreshProfile();
     } catch (e) { setError(e.message); }
   };
 
@@ -64,11 +67,20 @@ export default function Shop() {
 
       <div className="card" style={{ textAlign: "center" }}>
         <div className="stat" style={{ color: "var(--accent)" }}>💎 {data.balance}</div>
-        <div className="stat-label">gems to spend · {data.earned} earned</div>
-        <p className="muted" style={{ fontSize: "0.78rem", margin: "0.5rem 0 0" }}>
-          Earn gems from streaks, beating cravings, and supporting others.
-        </p>
+        <div className="stat-label">gems to spend · {data.earned} earned · {data.spent} spent</div>
       </div>
+
+      {/* exactly where gems come from — no mystery maths */}
+      {data.breakdown && (
+        <div className="card">
+          <strong>How you earn gems</strong>
+          <ul className="muted" style={{ margin: "0.5rem 0 0", paddingLeft: "1.1rem", fontSize: "0.85rem", lineHeight: 1.7 }}>
+            <li>🔥 Streak days — bonus at 1, 3, 7, 14, 30, 60, 100, 365 <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.streaks}</span></li>
+            <li>💪 2 per craving beaten ({data.breakdown.beaten} so far) <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.cravings}</span></li>
+            <li>💬 3 per community post ({data.breakdown.posts} so far) <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.reflections}</span></li>
+          </ul>
+        </div>
+      )}
 
       {msg && <div className="badge" style={{ color: "var(--success)" }}>{msg}</div>}
       {error && <div className="error">{error}</div>}

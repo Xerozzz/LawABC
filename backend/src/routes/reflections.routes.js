@@ -57,16 +57,43 @@ router.get("/", requireAuth, async (req, res) => {
   if (promptId) { params.push(promptId); where += ` AND r.prompt_id = $${params.length}`; }
   const { rows } = await query(
     `SELECT r.id, r.milestone_id, r.body, r.channel, r.prompt_id, r.created_at,
-            m.time_label AS milestone_label, u.avatar AS author_avatar
+            m.time_label AS milestone_label, u.avatar AS author_avatar, u.nickname AS author_name,
+            (SELECT COUNT(*)::int FROM reflection_joins j WHERE j.reflection_id = r.id) AS joins,
+            EXISTS(SELECT 1 FROM reflection_joins j
+                    WHERE j.reflection_id = r.id AND j.user_id = $${params.length + 1}) AS joined
        FROM reflections r
        LEFT JOIN health_milestones m ON m.id = r.milestone_id
        JOIN users u ON u.id = r.user_id
        ${where}
       ORDER BY r.created_at DESC
       LIMIT 100`,
-    params
+    [...params, req.user.id]
   );
   res.json(rows);
+});
+
+// Toggle "I'm in!" on a post (sports jios / community events).
+router.post("/:id/join", requireAuth, async (req, res) => {
+  const { rowCount } = await query(
+    "DELETE FROM reflection_joins WHERE reflection_id = $1 AND user_id = $2",
+    [req.params.id, req.user.id]
+  );
+  if (rowCount === 0) {
+    const { rows } = await query(
+      "SELECT id FROM reflections WHERE id = $1 AND status = 'visible'",
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Not found" });
+    await query(
+      "INSERT INTO reflection_joins (reflection_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      [req.params.id, req.user.id]
+    );
+  }
+  const { rows: c } = await query(
+    "SELECT COUNT(*)::int AS joins FROM reflection_joins WHERE reflection_id = $1",
+    [req.params.id]
+  );
+  res.json({ joined: rowCount === 0, joins: c[0].joins });
 });
 
 // Report a reflection -> hidden for moderation review (basic MVP moderation).

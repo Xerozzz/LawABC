@@ -17,6 +17,7 @@ export default function Profile() {
         savingsGoalLabel: p.savingsGoalLabel ?? "",
         savingsGoalAmount: p.savingsGoalAmount ?? "",
         consentLocation: p.consentLocation ?? false,
+        nickname: p.nickname ?? "",
       })
     );
   }, []);
@@ -36,6 +37,7 @@ export default function Profile() {
         savingsGoalLabel: form.savingsGoalLabel || null,
         savingsGoalAmount: form.savingsGoalAmount ? Number(form.savingsGoalAmount) : null,
         consentLocation: form.consentLocation,
+        nickname: form.nickname,
       });
       await refreshProfile();
       setSaved(true);
@@ -47,10 +49,12 @@ export default function Profile() {
   return (
     <div className="stack">
       <div className="row" style={{ gap: "0.8rem" }}>
-        <span style={{ fontSize: "2.4rem" }}>{user.avatar || "🌱"}</span>
+        <Link to="/shop" title="Change avatar" style={{ textDecoration: "none", fontSize: "2.4rem" }}>
+          {user.avatar || "🌱"}
+        </Link>
         <div>
-          <h1 className="h1" style={{ margin: 0 }}>Profile 👤</h1>
-          <p className="muted" style={{ margin: 0 }}>{user.email}</p>
+          <h1 className="h1" style={{ margin: 0 }}>{user.nickname || "Profile 👤"}</h1>
+          <p className="muted" style={{ margin: 0 }}>{user.email} · tap the avatar to change it</p>
         </div>
       </div>
 
@@ -60,6 +64,15 @@ export default function Profile() {
         {error && <div className="error">{error}</div>}
         {saved && <div className="badge" style={{ color: "var(--success)" }}>✓ Saved</div>}
 
+        <div className="field">
+          <label>Display name (shown on community posts — leave blank to stay Anonymous)</label>
+          <input
+            maxLength={24}
+            value={form.nickname}
+            onChange={(e) => set("nickname", e.target.value)}
+            placeholder="e.g. quitking_23"
+          />
+        </div>
         <div className="field">
           <label>Quit date</label>
           <input type="date" value={form.quitDate} onChange={(e) => set("quitDate", e.target.value)} />

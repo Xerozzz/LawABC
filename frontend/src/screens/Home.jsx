@@ -22,8 +22,9 @@ export default function Home() {
   const healPct = timeline.length ? Math.round((achieved / timeline.length) * 100) : 0;
   const next = timeline.find((m) => m.isNext);
 
-  const name = user?.email ? user.email.split("@")[0].replace(/[^a-zA-Z]/g, "") : "";
-  const greetName = name ? name.charAt(0).toUpperCase() + name.slice(1) : "there";
+  const emailName = user?.email ? user.email.split("@")[0].replace(/[^a-zA-Z]/g, "") : "";
+  const fallback = emailName ? emailName.charAt(0).toUpperCase() + emailName.slice(1) : "there";
+  const greetName = user?.nickname || fallback;
 
   return (
     <div className="stack">

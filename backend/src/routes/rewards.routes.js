@@ -12,13 +12,17 @@ async function computeEarned(userId) {
     query("SELECT COUNT(*) FILTER (WHERE outcome <> 'vaped')::int AS beaten FROM craving_events WHERE user_id = $1", [userId]),
     query("SELECT COUNT(*)::int AS n FROM reflections WHERE user_id = $1", [userId]),
   ]);
-  let gems = 0;
+  let streaks = 0;
   if (u[0]?.quit_date) {
     const days = Math.floor((Date.now() - new Date(u[0].quit_date).getTime()) / 86400000);
-    for (const s of STREAK_GEMS) if (days >= s.days) gems += s.gems;
+    for (const s of STREAK_GEMS) if (days >= s.days) streaks += s.gems;
   }
-  gems += cr[0].beaten * 2 + re[0].n * 3;
-  return gems;
+  const cravings = cr[0].beaten * 2;
+  const reflections = re[0].n * 3;
+  return {
+    total: streaks + cravings + reflections,
+    breakdown: { streaks, cravings, reflections, beaten: cr[0].beaten, posts: re[0].n },
+  };
 }
 
 async function ownedKeys(userId) {
@@ -37,9 +41,10 @@ router.get("/", requireAuth, async (req, res) => {
   ]);
   const spent = spentOf(owned);
   res.json({
-    earned,
+    earned: earned.total,
+    breakdown: earned.breakdown,
     spent,
-    balance: earned - spent,
+    balance: earned.total - spent,
     avatar: me[0].avatar,
     theme: me[0].theme,
     catalog: CATALOG.map((i) => ({ ...i, owned: owned.has(i.key) })),
@@ -52,7 +57,7 @@ router.post("/unlock", requireAuth, async (req, res) => {
   const owned = await ownedKeys(req.user.id);
   if (owned.has(item.key)) return res.json({ ok: true, already: true });
   const earned = await computeEarned(req.user.id);
-  if (earned - spentOf(owned) < item.cost) {
+  if (earned.total - spentOf(owned) < item.cost) {
     return res.status(400).json({ error: "Not enough gems yet — keep going!" });
   }
   await query("INSERT INTO unlocks (user_id, item_key) VALUES ($1, $2) ON CONFLICT DO NOTHING", [req.user.id, item.key]);

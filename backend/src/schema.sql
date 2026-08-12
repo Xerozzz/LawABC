@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS consent_accepted_at TIMESTAMPTZ;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '🌱';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS theme  TEXT DEFAULT 'default';
+-- Optional display name for community posts (still no real identity exposed).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname TEXT;
 
 -- Cosmetic items a user has unlocked with gems (avatars, themes).
 CREATE TABLE IF NOT EXISTS unlocks (
@@ -83,6 +85,14 @@ CREATE TABLE IF NOT EXISTS reflections (
 );
 ALTER TABLE reflections ADD COLUMN IF NOT EXISTS channel   TEXT NOT NULL DEFAULT 'general';
 ALTER TABLE reflections ADD COLUMN IF NOT EXISTS prompt_id TEXT;
+
+-- "I'm in!" sign-ups on community posts (sports jios, events).
+CREATE TABLE IF NOT EXISTS reflection_joins (
+  reflection_id INT NOT NULL REFERENCES reflections(id) ON DELETE CASCADE,
+  user_id       INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (reflection_id, user_id)
+);
 
 -- Lightweight product analytics (screen views + key actions) for the pilot.
 CREATE TABLE IF NOT EXISTS events (

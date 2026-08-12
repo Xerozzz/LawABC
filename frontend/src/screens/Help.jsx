@@ -22,7 +22,7 @@ const PROGRAMME = {
 
 // Curated, vetted stories — extend with links your team has reviewed (no random content).
 const STORIES = [
-  { name: "This Is Quitting (Truth Initiative)", detail: "Real young people on quitting vaping", href: "https://truthinitiative.org/thisisquitting" },
+  { name: "This Is Quitting (Truth Initiative)", detail: "Real young people on quitting vaping · opens truthinitiative.org", href: "https://truthinitiative.org/thisisquitting" },
 ];
 
 function ResourceCard({ r }) {

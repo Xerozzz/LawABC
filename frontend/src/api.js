@@ -65,6 +65,7 @@ export const api = {
   postReflection: (body, opts = {}) =>
     request("/reflections", { method: "POST", body: { body, ...opts } }),
   reportReflection: (id) => request(`/reflections/${id}/report`, { method: "POST" }),
+  joinReflection: (id) => request(`/reflections/${id}/join`, { method: "POST" }),
   getDailyPrompt: () => request("/reflections/prompt"),
 
   getRewards: () => request("/rewards"),
