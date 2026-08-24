@@ -20,8 +20,27 @@ pool.on("error", (err) => {
 
 export const query = (text, params) => pool.query(text, params);
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Wait until Postgres accepts connections. On a cold start (e.g. the whole
+// stack restarting) the DB can still be "starting up" when the app boots, so
+// retry instead of crashing.
+async function waitForDb({ retries = 30, delayMs = 2000 } = {}) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await query("SELECT 1");
+      return;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      console.log(`Database not ready (${err.code || err.message}); retry ${attempt}/${retries} in ${delayMs}ms…`);
+      await sleep(delayMs);
+    }
+  }
+}
+
 // Apply schema and seed reference data. Safe to run on every startup.
 export async function initDb() {
+  await waitForDb();
   const schema = readFileSync(join(__dirname, "schema.sql"), "utf8");
   await query(schema);
 
