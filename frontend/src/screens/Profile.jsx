@@ -6,7 +6,7 @@ import { useAuth } from "../AuthContext.jsx";
 export default function Profile() {
   const { user, logout, refreshProfile } = useAuth();
   const [form, setForm] = useState(null);
-  const [saved, setSaved] = useState(false);
+  const [savedCard, setSavedCard] = useState(null); // 'profile' | 'savings'
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -26,25 +26,30 @@ export default function Profile() {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const save = async (e) => {
+  const saveWith = (card, patch) => async (e) => {
     e.preventDefault();
     setError("");
-    setSaved(false);
+    setSavedCard(null);
     try {
-      await api.updateProfile({
-        quitDate: form.quitDate ? new Date(form.quitDate).toISOString() : null,
-        weeklySpend: Number(form.weeklySpend) || 0,
-        savingsGoalLabel: form.savingsGoalLabel || null,
-        savingsGoalAmount: form.savingsGoalAmount ? Number(form.savingsGoalAmount) : null,
-        consentLocation: form.consentLocation,
-        nickname: form.nickname,
-      });
+      await api.updateProfile(patch());
       await refreshProfile();
-      setSaved(true);
+      setSavedCard(card);
     } catch (err) {
       setError(err.message);
     }
   };
+
+  const saveProfile = saveWith("profile", () => ({
+    nickname: form.nickname,
+    quitDate: form.quitDate ? new Date(form.quitDate).toISOString() : null,
+    consentLocation: form.consentLocation,
+  }));
+
+  const saveSavings = saveWith("savings", () => ({
+    weeklySpend: Number(form.weeklySpend) || 0,
+    savingsGoalLabel: form.savingsGoalLabel || null,
+    savingsGoalAmount: form.savingsGoalAmount ? Number(form.savingsGoalAmount) : null,
+  }));
 
   return (
     <div className="stack">
@@ -60,22 +65,34 @@ export default function Profile() {
 
       <Link to="/shop"><button className="accent" style={{ width: "100%" }}>🎁 Rewards, avatars &amp; themes</button></Link>
 
-      <form className="card stack" onSubmit={save}>
-        {error && <div className="error">{error}</div>}
-        {saved && <div className="badge" style={{ color: "var(--success)" }}>✓ Saved</div>}
+      {error && <div className="error">{error}</div>}
 
+      {/* Profile details */}
+      <form className="card stack" onSubmit={saveProfile}>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <strong>👤 Profile</strong>
+          {savedCard === "profile" && <span className="badge" style={{ color: "var(--success)" }}>✓ Saved</span>}
+        </div>
         <div className="field">
           <label>Display name (shown on community posts — leave blank to stay Anonymous)</label>
-          <input
-            maxLength={24}
-            value={form.nickname}
-            onChange={(e) => set("nickname", e.target.value)}
-            placeholder="e.g. quitking_23"
-          />
+          <input maxLength={24} value={form.nickname} onChange={(e) => set("nickname", e.target.value)} placeholder="e.g. quitking_23" />
         </div>
         <div className="field">
           <label>Quit date</label>
           <input type="date" value={form.quitDate} onChange={(e) => set("quitDate", e.target.value)} />
+        </div>
+        <label className="row" style={{ gap: "0.6rem" }}>
+          <input type="checkbox" style={{ width: "auto" }} checked={form.consentLocation} onChange={(e) => set("consentLocation", e.target.checked)} />
+          <span className="muted" style={{ fontSize: "0.85rem" }}>Track craving locations for trigger warnings</span>
+        </label>
+        <button type="submit">Save profile</button>
+      </form>
+
+      {/* Savings */}
+      <form className="card stack" onSubmit={saveSavings}>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <strong>💰 Savings</strong>
+          {savedCard === "savings" && <span className="badge" style={{ color: "var(--success)" }}>✓ Saved</span>}
         </div>
         <div className="field">
           <label>Weekly vaping spend ($)</label>
@@ -89,12 +106,7 @@ export default function Profile() {
           <label>Goal amount ($)</label>
           <input type="number" min="0" value={form.savingsGoalAmount} onChange={(e) => set("savingsGoalAmount", e.target.value)} />
         </div>
-        <label className="row" style={{ gap: "0.6rem" }}>
-          <input type="checkbox" style={{ width: "auto" }} checked={form.consentLocation} onChange={(e) => set("consentLocation", e.target.checked)} />
-          <span className="muted" style={{ fontSize: "0.85rem" }}>Track craving locations for trigger warnings</span>
-        </label>
-
-        <button type="submit">Save changes</button>
+        <button type="submit">Save savings</button>
       </form>
 
       <Link to="/privacy"><button className="ghost" style={{ width: "100%" }}>🔒 Privacy &amp; data</button></Link>

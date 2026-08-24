@@ -8,6 +8,7 @@ import Consent from "./screens/Consent.jsx";
 import Onboarding from "./screens/Onboarding.jsx";
 import Help from "./screens/Help.jsx";
 import Home from "./screens/Home.jsx";
+import Progress from "./screens/Progress.jsx";
 import Timeline from "./screens/Timeline.jsx";
 import Savings from "./screens/Savings.jsx";
 import CravingSOS from "./screens/CravingSOS.jsx";
@@ -40,7 +41,9 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/timeline" element={<Timeline />} />
+        <Route path="/progress" element={<Progress />} />
+        <Route path="/health" element={<Timeline />} />
+        <Route path="/timeline" element={<Navigate to="/health" replace />} />
         <Route path="/savings" element={<Savings />} />
         <Route path="/community" element={<Community />} />
         <Route path="/triggers" element={<TriggerMap />} />

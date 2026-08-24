@@ -4,7 +4,7 @@ import { api } from "../api.js";
 
 const leftTabs = [
   { to: "/", icon: "🏠", label: "Home", end: true },
-  { to: "/timeline", icon: "📈", label: "Progress" },
+  { to: "/progress", icon: "📈", label: "Progress" },
 ];
 const rightTabs = [
   { to: "/community", icon: "💬", label: "Community" },
