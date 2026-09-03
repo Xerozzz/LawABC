@@ -43,6 +43,8 @@ export const api = {
   // Fire-and-forget analytics; never let logging break the UI.
   logEvent: (type, meta) =>
     request("/events", { method: "POST", body: { type, meta } }).catch(() => {}),
+  // The user's own 14-day participation grid.
+  getActivity: () => request("/events/activity"),
 
   getMilestones: () => request("/milestones"),
   getSavings: () => request("/savings"),

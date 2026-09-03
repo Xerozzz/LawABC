@@ -28,6 +28,10 @@ services:
       TZ: ${TZ:-Asia/Singapore}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       DATABASE_URL: postgres://${POSTGRES_USER:-lawabc}:${POSTGRES_PASSWORD:-lawabc_password}@db:5432/${POSTGRES_DB:-lawabc}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      STUDY_DAYS: ${STUDY_DAYS:-14}
+      STUDY_TZ: ${STUDY_TZ:-Asia/Singapore}
+      STUDY_START_DATE: ${STUDY_START_DATE:-}
     ports:
       - "${BACKEND_PORT:-4000}:4000"
     depends_on:

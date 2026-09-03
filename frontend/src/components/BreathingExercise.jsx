@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { api } from "../api.js";
 
 // 4-4-4 box-ish breathing for ~60 seconds.
 const PHASES = [
@@ -75,6 +76,7 @@ export default function BreathingExercise({ onDone }) {
       if (sound && tick.current % PHASE_SECS === 0) playCue(PHASES[idx].freq);
       if (tick.current >= TOTAL) {
         clearInterval(id);
+        api.logEvent("breathing_completed", { seconds: TOTAL });
         onDone();
       }
     }, 1000);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { api } from "../api.js";
 import MiniGame from "./MiniGame.jsx";
 import Game2048 from "./Game2048.jsx";
 import FlappyGame from "./FlappyGame.jsx";
@@ -13,6 +14,11 @@ const GAMES = [
 
 export default function GamePicker({ onDone }) {
   const [game, setGame] = useState(null);
+
+  const play = (g) => {
+    setGame(g);
+    api.logEvent("game_played", { game: g.key });
+  };
 
   if (game) {
     const C = game.Comp;
@@ -31,7 +37,7 @@ export default function GamePicker({ onDone }) {
       <p className="muted">Pick something to get lost in for a minute</p>
       <div style={{ display: "flex", gap: "0.6rem", justifyContent: "center", flexWrap: "wrap", marginTop: "0.6rem" }}>
         {GAMES.map((g) => (
-          <button key={g.key} className="ghost" style={{ padding: "1rem", minWidth: 92 }} onClick={() => setGame(g)}>
+          <button key={g.key} className="ghost" style={{ padding: "1rem", minWidth: 92 }} onClick={() => play(g)}>
             <div style={{ fontSize: "1.7rem" }}>{g.icon}</div>
             <div style={{ fontSize: "0.85rem" }}>{g.label}</div>
           </button>

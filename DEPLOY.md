@@ -133,6 +133,20 @@ After that, every push to `main` runs the workflow (see the **Actions** tab). It
 volume persists across deploys. You can also trigger it manually from the Actions tab
 ("Run workflow"). Until steps 1–3 are done, the workflow will appear and fail — that's expected.
 
+## Pilot study data
+
+Participation tracking and the study-team endpoints are documented in
+[STUDY.md](STUDY.md). Quick version:
+
+```bash
+TOKEN=$(cd infra && terraform output -raw admin_token)
+curl -s -H "x-admin-token: $TOKEN" http://<ip>/api/admin/participation.csv -o participation.csv
+```
+
+Nightly DB backups are installed on first boot (`ops/backup-db.sh`, 03:15 SGT,
+kept 30 days in `/var/backups/clearair`). Set `S3_BUCKET` in
+`/etc/cron.d/clearair-backup` to also copy them off the instance.
+
 ## Security notes (prototype-grade)
 
 - SSH is restricted to `admin_cidr`; web ports 80/443 are open (as they must be).

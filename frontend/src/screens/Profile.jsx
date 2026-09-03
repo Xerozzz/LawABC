@@ -32,6 +32,7 @@ export default function Profile() {
     setSavedCard(null);
     try {
       await api.updateProfile(patch());
+      api.logEvent("profile_updated", { card });
       await refreshProfile();
       setSavedCard(card);
     } catch (err) {

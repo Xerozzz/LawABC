@@ -31,6 +31,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       DATABASE_URL: postgres://${POSTGRES_USER:-clearair}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-clearair}
       DEMO_SEED: ${DEMO_SEED:-true}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      STUDY_DAYS: ${STUDY_DAYS:-14}
+      STUDY_TZ: ${STUDY_TZ:-Asia/Singapore}
+      STUDY_START_DATE: ${STUDY_START_DATE:-}
     depends_on:
       db:
         condition: service_healthy

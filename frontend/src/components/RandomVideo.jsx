@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "../api.js";
 
 // Curated distraction videos (satisfying / calming — vetted, extend over time).
 // Embedded via youtube-nocookie; "watch on YouTube" as a fallback if embeds fail.
@@ -17,6 +18,10 @@ export default function RandomVideo() {
   // pick a starting video based on the current minute (same trick as the stories)
   const [idx, setIdx] = useState(() => new Date().getMinutes() % VIDEOS.length);
   const video = VIDEOS[idx];
+
+  useEffect(() => {
+    api.logEvent("video_watched", { video: video.id });
+  }, [video.id]);
 
   return (
     <div style={{ textAlign: "center", width: "100%" }}>

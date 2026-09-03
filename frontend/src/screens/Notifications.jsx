@@ -26,6 +26,7 @@ export default function Notifications() {
       .getNotifications()
       .then((d) => {
         setItems(d.notifications);
+        api.logEvent("notifications_opened", { count: d.notifications.length });
         // mark read so the badge clears
         return api.markNotificationsRead();
       })

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth } from "../auth.js";
+import { getUserActivity } from "../activity.js";
 
 const router = Router();
 
@@ -16,6 +17,13 @@ router.post("/", requireAuth, async (req, res) => {
     [req.user.id, type.slice(0, 60), meta && typeof meta === "object" ? meta : null]
   );
   res.status(201).json({ ok: true });
+});
+
+// The user's own participation grid (see activity.js for how a day qualifies).
+router.get("/activity", requireAuth, async (req, res) => {
+  const activity = await getUserActivity(req.user.id);
+  if (!activity) return res.status(404).json({ error: "Not found" });
+  res.json(activity);
 });
 
 export default router;

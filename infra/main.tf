@@ -16,6 +16,12 @@ resource "random_password" "jwt" {
   special = false
 }
 
+# Shared secret for the study team's /api/admin/* endpoints.
+resource "random_password" "admin_token" {
+  length  = 48
+  special = false
+}
+
 # --- Networking: use the account's default VPC/subnet to keep the prototype simple ---
 data "aws_vpc" "default" {
   default = true
@@ -125,6 +131,7 @@ resource "aws_instance" "app" {
     site_address      = var.site_address
     postgres_password = random_password.postgres.result
     jwt_secret        = random_password.jwt.result
+    admin_token       = random_password.admin_token.result
   })
 
   # Re-run bootstrap if the deploy inputs change.

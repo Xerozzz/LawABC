@@ -102,5 +102,23 @@ npm run dev
 | GET    | `/api/reflections`          | yes  | Anonymous reflection feed            |
 | POST   | `/api/reflections`          | yes  | Post an anonymous reflection         |
 | POST   | `/api/reflections/:id/report` | yes | Report → hide a reflection          |
+| POST   | `/api/events`               | yes  | Log an analytics event               |
+| GET    | `/api/events/activity`      | yes  | The user's own check-in grid         |
 
 Authenticated requests send `Authorization: Bearer <token>`.
+
+### Study endpoints (`/api/admin/*`)
+
+Guarded by a shared secret, not a user role — send `x-admin-token: $ADMIN_TOKEN`.
+With `ADMIN_TOKEN` unset the whole router returns 503, so it is off by default.
+
+| Method | Path                             | Description                                  |
+|--------|----------------------------------|----------------------------------------------|
+| GET    | `/api/admin/summary`             | Cohort overview (participants, distribution) |
+| GET    | `/api/admin/participation`       | Every user × every study day (JSON)          |
+| GET    | `/api/admin/participation.csv`   | The same as a spreadsheet — use this to pay  |
+| GET    | `/api/admin/users`               | Accounts with join/consent dates             |
+| GET    | `/api/admin/users/:id/logs`      | One participant's complete log               |
+| GET    | `/api/admin/events?limit&since`  | Raw event stream, newest first               |
+
+See [STUDY.md](STUDY.md) for how a day qualifies and how to run the payout.

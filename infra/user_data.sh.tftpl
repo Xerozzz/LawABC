@@ -28,8 +28,15 @@ POSTGRES_DB=clearair
 JWT_SECRET=${jwt_secret}
 DEMO_SEED=true
 SITE_ADDRESS=${site_address}
+ADMIN_TOKEN=${admin_token}
+STUDY_DAYS=14
+STUDY_TZ=Asia/Singapore
 EOF
 chmod 600 /opt/clearair/.env
 
 # --- Build and start the stack ---
 docker compose -f docker-compose.prod.yml up -d --build
+
+# --- Nightly database backup (pilot reward data must survive an instance loss) ---
+chmod +x /opt/clearair/ops/backup-db.sh
+/opt/clearair/ops/backup-db.sh --install

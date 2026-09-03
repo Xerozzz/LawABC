@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api } from "../api.js";
 
 // Short pep-talks, written like a friend texting you back. Extend / move server-side later.
 const STORIES = [
@@ -30,6 +31,7 @@ export default function MotivationalStory({ onDone }) {
       setRemaining((r) => {
         if (r <= 1) {
           clearInterval(id);
+          api.logEvent("story_read");
           onDone();
           return 0;
         }

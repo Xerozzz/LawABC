@@ -1,5 +1,18 @@
 node_modules/
 dist/
-.env
 *.log
 .DS_Store
+
+# Local environment files. The *.example templates are committed; real ones never are.
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# Terraform. State files hold the generated Postgres password, JWT secret and
+# ADMIN_TOKEN in PLAINTEXT — they must never reach the repo.
+infra/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
