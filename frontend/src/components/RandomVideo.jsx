@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
 
-// Curated distraction videos (satisfying / calming — vetted, extend over time).
-// Embedded via youtube-nocookie; "watch on YouTube" as a fallback if embeds fail.
+// Curated distraction videos (satisfying / calming — vetted; re-check periodically
+// as YouTube links can rot). Embedded via youtube-nocookie.
+// Last verified: 2026-09-14. If a link dies, use the 🔀 button to skip.
 const VIDEOS = [
   { id: "ezTAhDES8bQ", label: "Oddly satisfying + calming music" },
   { id: "q0M_RCex2CY", label: "Satisfying video with cozy lo-fi" },
-  { id: "2-zpJwVmcwE", label: "Relaxing before-sleep satisfying mix" },
   { id: "safMZrxWkSs", label: "Try not to say WOW" },
   { id: "AM59mw2Yh18", label: "Satisfying & relaxing lo-fi mix" },
   { id: "B6GSz2eI6j4", label: "Deep-chill satisfying video" },
-  { id: "7Lzvcy8xgrQ", label: "Calming satisfying mix" },
-  { id: "jfKfPfyJRdk", label: "Lo-fi beats to chill to" },
+  { id: "jfKfPfyJRdk", label: "Lo-fi beats to study to" },
+  { id: "rUxyKA_-grg", label: "Sleepy lo-fi beats to relax to" },
+  { id: "4xDzrJKXOOY", label: "Synthwave chill radio" },
+  { id: "5yx6BWlEVcY", label: "Chillhop jazzy lo-fi beats" },
 ];
 
 export default function RandomVideo() {
@@ -56,6 +58,9 @@ export default function RandomVideo() {
           Open in YouTube ↗
         </a>
       </div>
+      <p className="muted" style={{ fontSize: "0.75rem", marginTop: "0.4rem" }}>
+        Not playing? Tap <strong>🔀 Another one</strong> to switch.
+      </p>
     </div>
   );
 }
