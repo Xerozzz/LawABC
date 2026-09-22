@@ -27,8 +27,8 @@ export default function MetricBubbles() {
         <div className="row" style={{ gap: "0.7rem" }}>
           <span className="metric-ico" style={{ background: "#ffecec" }}>💪</span>
           <div>
-            <strong>Cravings beaten</strong>
-            <div className="muted" style={{ fontSize: "0.8rem" }}>holding on counts too</div>
+            <strong>Cravings Beaten</strong>
+            <div className="muted" style={{ fontSize: "0.8rem" }}>Holding on counts too</div>
           </div>
         </div>
         <strong style={{ color: "var(--danger)", fontSize: "1.3rem" }}>{cravingStats?.beaten ?? 0}</strong>
@@ -55,7 +55,7 @@ export default function MetricBubbles() {
           <div className="row" style={{ gap: "0.7rem" }}>
             <span className="metric-ico" style={{ background: "#ebe7ff" }}>🫁</span>
             <div>
-              <div className="badge" style={{ color: "var(--purple)" }}>Next milestone</div>
+              <div className="badge" style={{ color: "var(--purple)" }}>Next Milestone</div>
               <strong style={{ display: "block", marginTop: "0.3rem" }}>{next.title}</strong>
               <div className="muted" style={{ fontSize: "0.8rem" }}>{next.timeLabel} · {Math.round(next.progress * 100)}% there</div>
             </div>
@@ -71,7 +71,7 @@ export default function MetricBubbles() {
             <div>
               <strong>Money Saved</strong>
               <div className="muted" style={{ fontSize: "0.8rem" }}>
-                {savings?.goalLabel ? `towards ${savings.goalLabel}` : "keep it up"}
+                {savings?.goalLabel ? `Towards ${savings.goalLabel}` : "Keep it up"}
               </div>
             </div>
           </div>

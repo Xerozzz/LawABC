@@ -1,29 +1,29 @@
 :root {
   /* Surfaces */
-  --bg: #f5f7fa;
+  --bg: #eef3f9;
   --surface: #ffffff;
-  --surface-2: #eef1f5;
-  --border: #e4e8ee;
-  --border-strong: #d3dae2;
+  --surface-2: #eef3f8;
+  --border: #e4ebf3;
+  --border-strong: #d3dbe4;
 
   /* Text */
-  --text: #101828;
-  --text-dim: #667085;
+  --text: #17232e;
+  --text-dim: #6f8196;
 
-  /* Brand — deep, calm teal (professional, not neon) */
-  --brand: #0d9488;
-  --brand-2: #14b8a6;
-  --brand-ink: #0b6b62;
-  --accent: #b7791f;      /* muted amber — used sparingly */
-  --purple: #5b60e0;      /* restrained indigo */
-  --danger: #d9484f;
-  --success: #2f9e6e;
+  /* Brand — original teal/gold scheme */
+  --brand: #17c3b2;
+  --brand-2: #22d3a6;
+  --brand-ink: #12a99a;   /* darker teal for hovers */
+  --accent: #ffb703;
+  --purple: #8b7bf0;
+  --danger: #ff5a6a;
+  --success: #22b07d;
 
-  /* Hero — soft, low-saturation */
-  --hero-1: #e6f1f0;
-  --hero-2: #f1f6f8;
-  --hero-3: #ffffff;
-  --hero-border: #dbe7e6;
+  /* Hero — sky gradient */
+  --hero-1: #bfe4ff;
+  --hero-2: #dff1ff;
+  --hero-3: #eafaf1;
+  --hero-border: #cfe8fb;
 
   --radius: 16px;
   --radius-sm: 10px;
@@ -152,9 +152,9 @@ a { color: var(--brand); }
   border-radius: var(--radius); padding: 1.25rem 1.25rem 0;
   background: linear-gradient(180deg, var(--hero-1), var(--hero-3));
   border: 1px solid var(--hero-border); overflow: hidden; box-shadow: var(--shadow-sm);
-  color: var(--text);
+  color: #10384f;
 }
-.hero .big { font-size: 2.3rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; color: var(--brand-ink); }
+.hero .big { font-size: 2.3rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; color: #10384f; }
 
 /* Top bar */
 .topbar {

@@ -2,8 +2,8 @@
 // bg + hero re-skin the whole app so switching themes is obviously worth the gems.
 export const THEME_COLORS = {
   default: {
-    brand: "#0d9488", brand2: "#14b8a6", accent: "#b7791f",
-    bg: "#f5f7fa", hero: ["#e6f1f0", "#f1f6f8", "#ffffff"], heroBorder: "#dbe7e6",
+    brand: "#17c3b2", brand2: "#22d3a6", accent: "#ffb703",
+    bg: "#eef3f9", hero: ["#bfe4ff", "#dff1ff", "#eafaf1"], heroBorder: "#cfe8fb",
   },
   sunset: {
     brand: "#ff7b54", brand2: "#ff9e7d", accent: "#ffd56b",

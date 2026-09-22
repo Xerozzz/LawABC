@@ -12,7 +12,7 @@ export const AVATARS = [
 ];
 
 export const THEMES = [
-  { key: "default", type: "theme", label: "Teal", cost: 0, colors: { brand: "#0d9488", brand2: "#14b8a6", accent: "#b7791f" } },
+  { key: "default", type: "theme", label: "Teal", cost: 0, colors: { brand: "#17c3b2", brand2: "#22d3a6", accent: "#ffb703" } },
   { key: "sunset", type: "theme", label: "Sunset", cost: 30, colors: { brand: "#ff7b54", brand2: "#ff9e7d", accent: "#ffd56b" } },
   { key: "grape", type: "theme", label: "Grape", cost: 30, colors: { brand: "#9b5de5", brand2: "#b57bee", accent: "#f15bb5" } },
   { key: "ocean", type: "theme", label: "Ocean", cost: 50, colors: { brand: "#4cc9f0", brand2: "#80ffdb", accent: "#7bdff2" } },

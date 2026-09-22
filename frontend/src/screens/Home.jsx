@@ -46,7 +46,7 @@ export default function Home() {
       <Link to="/triggers" className="card row" style={{ textDecoration: "none", color: "inherit", justifyContent: "space-between" }}>
         <div className="row" style={{ gap: "0.7rem" }}>
           <span className="metric-ico" style={{ backgroundColor: "#ffecec" }}>📍</span>
-          <strong>Trigger map</strong>
+          <strong>Trigger Map</strong>
         </div>
         <span className="muted">›</span>
       </Link>
@@ -56,8 +56,8 @@ export default function Home() {
         <div className="row" style={{ gap: "0.7rem" }}>
           <span className="metric-ico" style={{ backgroundColor: "#fff4d9" }}>💎</span>
           <div>
-            <strong>Gems &amp; rewards</strong>
-            <div className="muted" style={{ fontSize: "0.8rem" }}>earn from streaks + beating cravings</div>
+            <strong>Gems &amp; Rewards</strong>
+            <div className="muted" style={{ fontSize: "0.8rem" }}>Earn from streaks + beating cravings</div>
           </div>
         </div>
         <span className="muted">›</span>
