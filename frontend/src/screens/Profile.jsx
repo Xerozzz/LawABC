@@ -59,19 +59,19 @@ export default function Profile() {
           {user.avatar || "🌱"}
         </Link>
         <div>
-          <h1 className="h1" style={{ margin: 0 }}>{user.nickname || "Profile 👤"}</h1>
+          <h1 className="h1" style={{ margin: 0 }}>{user.nickname || "Profile"}</h1>
           <p className="muted" style={{ margin: 0 }}>{user.email} · tap the avatar to change it</p>
         </div>
       </div>
 
-      <Link to="/shop"><button className="accent" style={{ width: "100%" }}>🎁 Rewards, avatars &amp; themes</button></Link>
+      <Link to="/shop"><button className="ghost" style={{ width: "100%" }}>Rewards &amp; personalisation</button></Link>
 
       {error && <div className="error">{error}</div>}
 
       {/* Profile details */}
       <form className="card stack" onSubmit={saveProfile}>
         <div className="row" style={{ justifyContent: "space-between" }}>
-          <strong>👤 Profile</strong>
+          <strong>Profile</strong>
           {savedCard === "profile" && <span className="badge" style={{ color: "var(--success)" }}>✓ Saved</span>}
         </div>
         <div className="field">
@@ -92,7 +92,7 @@ export default function Profile() {
       {/* Savings */}
       <form className="card stack" onSubmit={saveSavings}>
         <div className="row" style={{ justifyContent: "space-between" }}>
-          <strong>💰 Savings</strong>
+          <strong>Savings</strong>
           {savedCard === "savings" && <span className="badge" style={{ color: "var(--success)" }}>✓ Saved</span>}
         </div>
         <div className="field">
@@ -110,7 +110,7 @@ export default function Profile() {
         <button type="submit">Save savings</button>
       </form>
 
-      <Link to="/privacy"><button className="ghost" style={{ width: "100%" }}>🔒 Privacy &amp; data</button></Link>
+      <Link to="/privacy"><button className="ghost" style={{ width: "100%" }}>Privacy &amp; data</button></Link>
       <button className="ghost" onClick={logout}>Log out</button>
     </div>
   );

@@ -25,7 +25,7 @@ export default function Home() {
       {/* greeting + streak */}
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h1 className="h1" style={{ margin: 0 }}>Hey {greetName}! 👋</h1>
+          <h1 className="h1" style={{ margin: 0 }}>Hey {greetName}</h1>
           <p className="muted" style={{ margin: 0 }}>You've got this.</p>
         </div>
         <span className="streak">🔥 {days} day{days === 1 ? "" : "s"}</span>
