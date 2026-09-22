@@ -1,129 +1,71 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import Icon from "./Icon.jsx";
 
-// Weekday initial for a 'YYYY-MM-DD' string, read in the study's timezone-free
-// calendar terms (the server already cut the days for us).
+const DOW = ["S", "M", "T", "W", "T", "F", "S"];
 const dow = (ymd) => {
   const [y, m, d] = ymd.split("-").map(Number);
-  return ["S", "M", "T", "W", "T", "F", "S"][new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return DOW[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
 };
-const dayOfMonth = (ymd) => Number(ymd.slice(8, 10));
 
 function Cell({ day }) {
-  const base = {
-    aspectRatio: "1",
-    borderRadius: 12,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "0.7rem",
-    fontWeight: 700,
-    border: "1px solid var(--border)",
-    background: "var(--surface-2)",
-    color: "var(--text-dim)",
+  const s = {
+    width: "100%", aspectRatio: "1", borderRadius: 12,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontSize: "0.82rem", fontWeight: 700,
+    background: "var(--surface-2)", color: "var(--text-dim)", border: "1px solid transparent",
   };
-
-  if (day.active) {
-    Object.assign(base, {
-      background: "linear-gradient(160deg, var(--brand-2), var(--brand))",
-      borderColor: "transparent",
-      color: "#06231f",
-      boxShadow: "0 4px 12px rgba(23,195,178,0.28)",
-    });
-  } else if (day.opened) {
-    // opened the app but did nothing that counts — show it honestly
-    Object.assign(base, { borderStyle: "dashed", borderColor: "var(--brand)", color: "var(--brand)" });
-  } else if (day.isFuture) {
-    Object.assign(base, { background: "transparent", borderStyle: "dashed", opacity: 0.5 });
-  }
-
-  if (day.isToday) {
-    base.outline = "2px solid var(--accent)";
-    base.outlineOffset = "2px";
-  }
-
-  const label = day.active
-    ? `Day ${day.dayNumber}: ${day.actions} action${day.actions === 1 ? "" : "s"}`
-    : day.opened
-      ? `Day ${day.dayNumber}: opened the app, no activity logged`
-      : day.isFuture
-        ? `Day ${day.dayNumber}: still to come`
-        : `Day ${day.dayNumber}: nothing logged`;
+  if (day.active) Object.assign(s, { background: "var(--brand)", color: "#fff" });
+  else if (day.opened || day.isToday) Object.assign(s, { background: "#fff", border: "1.5px dashed var(--brand)", color: "var(--brand)" });
+  else if (day.isFuture) Object.assign(s, { background: "var(--surface-2)", color: "var(--text-dim)", opacity: 0.7 });
 
   return (
-    <div style={base} title={label} aria-label={label}>
-      <span style={{ opacity: 0.75, fontSize: "0.6rem" }}>{dow(day.date)}</span>
-      <span style={{ fontSize: "0.9rem" }}>{day.active ? "✓" : dayOfMonth(day.date)}</span>
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: "0.68rem", color: "var(--text-dim)", fontWeight: 600, marginBottom: 4 }}>{dow(day.date)}</div>
+      <div style={s} title={`Day ${day.dayNumber}`}>
+        {day.active ? <Icon name="check" size={16} /> : Number(day.date.slice(8, 10))}
+      </div>
     </div>
   );
 }
 
+const Key = ({ style, label }) => (
+  <span className="row" style={{ gap: "0.35rem" }}>
+    <i style={{ width: 14, height: 14, borderRadius: 5, ...style }} /> {label}
+  </span>
+);
+
 export default function ActivityGrid() {
   const [data, setData] = useState(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    api.getActivity().then(setData).catch((e) => setError(e.message));
-  }, []);
-
-  if (error) return null;              // never let the grid break the page
-  if (!data) return <div className="card muted">Loading your check-in streak…</div>;
-
-  const pct = Math.round((data.activeDays / data.totalDays) * 100);
+  useEffect(() => { api.getActivity().then(setData).catch(() => {}); }, []);
+  if (!data) return null;
 
   return (
     <div className="card">
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <strong>Your {data.totalDays}-day check-in 🗓️</strong>
-          <p className="muted" style={{ margin: "0.25rem 0 0", fontSize: "0.82rem" }}>
-            {data.complete
-              ? "Your check-in window is complete — thank you!"
-              : `Day ${data.dayNumber} of ${data.totalDays} · ${data.daysRemaining} to go`}
+          <strong>{data.totalDays}-day check-in</strong>
+          <p className="muted" style={{ margin: "0.2rem 0 0", fontSize: "0.82rem" }}>
+            A day counts when you log, post or use SOS.
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div className="stat" style={{ fontSize: "1.6rem", color: "var(--brand)" }}>
-            {data.activeDays}/{data.totalDays}
+          <div style={{ fontWeight: 800, fontSize: "1.5rem", color: "var(--brand)", letterSpacing: "-0.02em" }}>
+            {data.activeDays}<span style={{ fontSize: "0.9rem" }}>/{data.totalDays}</span>
           </div>
-          <div className="stat-label">days active</div>
+          <div className="muted" style={{ fontSize: "0.72rem" }}>days active</div>
         </div>
       </div>
 
-      <div className="progress" style={{ marginTop: "0.8rem" }}>
-        <span style={{ width: `${pct}%` }} />
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          gap: "0.4rem",
-          marginTop: "0.9rem",
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: "0.45rem", marginTop: "0.9rem" }}>
         {data.days.map((d) => <Cell key={d.date} day={d} />)}
       </div>
 
-      <div className="row" style={{ gap: "0.9rem", marginTop: "0.8rem", flexWrap: "wrap", fontSize: "0.72rem" }}>
-        <span className="row" style={{ gap: "0.35rem" }}>
-          <i style={{ width: 12, height: 12, borderRadius: 4, background: "var(--brand)" }} /> active
-        </span>
-        <span className="row" style={{ gap: "0.35rem" }}>
-          <i style={{ width: 12, height: 12, borderRadius: 4, border: "1px dashed var(--brand)" }} /> opened only
-        </span>
-        <span className="row" style={{ gap: "0.35rem" }}>
-          <i style={{ width: 12, height: 12, borderRadius: 4, background: "var(--surface-2)", border: "1px solid var(--border)" }} /> missed
-        </span>
+      <div className="row" style={{ gap: "1rem", marginTop: "0.9rem", flexWrap: "wrap", fontSize: "0.74rem", color: "var(--text-dim)" }}>
+        <Key style={{ background: "var(--brand)" }} label="Active" />
+        <Key style={{ background: "#fff", border: "1.5px dashed var(--brand)" }} label="Opened only" />
+        <Key style={{ background: "var(--surface-2)" }} label="Missed" />
       </div>
-
-      <p className="muted" style={{ margin: "0.8rem 0 0", fontSize: "0.78rem" }}>
-        A day counts once you actually do something — log a craving, use a Craving SOS tool,
-        post in the community, or update your profile. Days run midnight to midnight
-        ({data.timezone.replace("_", " ")}).
-        {data.current > 1 && ` You're on a ${data.current}-day run 🔥`}
-      </p>
     </div>
   );
 }

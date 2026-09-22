@@ -126,7 +126,7 @@ export default function Home() {
           <div className="num">{stats?.beaten ?? 0}</div>
           <div className="lbl">cravings beaten</div>
         </div>
-        <Link to="/health" className="tile" style={{ textDecoration: "none", color: "inherit" }}>
+        <Link to="/progress" className="tile" style={{ textDecoration: "none", color: "inherit" }}>
           <span className="ico-chip" style={{ background: "#e5f7f0", color: "var(--brand)" }}><Icon name="heart" size={18} /></span>
           <div className="num">{healPct}%</div>
           <div className="lbl">health recovered</div>

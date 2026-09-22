@@ -42,8 +42,8 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/progress" element={<Progress />} />
-        <Route path="/health" element={<Timeline />} />
-        <Route path="/timeline" element={<Navigate to="/health" replace />} />
+        <Route path="/health" element={<Navigate to="/progress" replace />} />
+        <Route path="/timeline" element={<Navigate to="/progress" replace />} />
         <Route path="/savings" element={<Savings />} />
         <Route path="/community" element={<Community />} />
         <Route path="/triggers" element={<TriggerMap />} />

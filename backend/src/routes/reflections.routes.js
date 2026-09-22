@@ -58,6 +58,7 @@ router.get("/", requireAuth, async (req, res) => {
   const { rows } = await query(
     `SELECT r.id, r.milestone_id, r.body, r.channel, r.prompt_id, r.created_at,
             m.time_label AS milestone_label, u.avatar AS author_avatar, u.nickname AS author_name,
+            FLOOR(EXTRACT(EPOCH FROM (NOW() - u.quit_date)) / 86400)::int AS author_day,
             (SELECT COUNT(*)::int FROM reflection_joins j WHERE j.reflection_id = r.id) AS joins,
             EXISTS(SELECT 1 FROM reflection_joins j
                     WHERE j.reflection_id = r.id AND j.user_id = $${params.length + 1}) AS joined
