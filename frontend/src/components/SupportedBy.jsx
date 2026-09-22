@@ -8,12 +8,15 @@ const LOGOS = [
   { src: "/logos/sglaw200.webp", alt: "SG Law 200" },
 ];
 
-export default function SupportedBy() {
+export default function SupportedBy({ compact = false }) {
+  const tileH = compact ? 42 : 52;
+  const imgH = compact ? 26 : 32;
+  const imgW = compact ? 96 : 116;
   return (
-    <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+    <div style={{ textAlign: "center", marginTop: compact ? "0.75rem" : "1.5rem", opacity: compact ? 0.9 : 1 }}>
       <div
         className="muted"
-        style={{ fontSize: "0.68rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.7rem" }}
+        style={{ fontSize: "0.66rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.6rem" }}
       >
         Supported by
       </div>
@@ -26,8 +29,8 @@ export default function SupportedBy() {
               border: "1px solid var(--border)",
               borderRadius: 12,
               boxShadow: "var(--shadow-sm)",
-              height: 52,
-              padding: "0.4rem 0.7rem",
+              height: tileH,
+              padding: "0.35rem 0.65rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -36,7 +39,7 @@ export default function SupportedBy() {
             <img
               src={l.src}
               alt={l.alt}
-              style={{ maxHeight: 32, maxWidth: 116, objectFit: "contain", display: "block" }}
+              style={{ maxHeight: imgH, maxWidth: imgW, objectFit: "contain", display: "block" }}
             />
           </div>
         ))}

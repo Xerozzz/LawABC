@@ -4,6 +4,7 @@ import { api } from "../api.js";
 import { useAuth } from "../AuthContext.jsx";
 import TreeGrowth from "../components/TreeGrowth.jsx";
 import MetricBubbles from "../components/MetricBubbles.jsx";
+import SupportedBy from "../components/SupportedBy.jsx";
 
 export default function Home() {
   const { user } = useAuth();
@@ -74,6 +75,9 @@ export default function Home() {
           </div>
         </div>
       </Link>
+
+      {/* quiet supporter footer */}
+      <SupportedBy compact />
     </div>
   );
 }
