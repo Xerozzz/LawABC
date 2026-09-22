@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../AuthContext.jsx";
+import SupportedBy from "../components/SupportedBy.jsx";
 
 export default function AuthScreen() {
   const { login, register } = useAuth();
@@ -80,6 +81,8 @@ export default function AuthScreen() {
       <p className="muted" style={{ fontSize: "0.75rem", textAlign: "center", marginTop: "1rem" }}>
         Private and judgement-free. You're not in this alone. 💚
       </p>
+
+      <SupportedBy />
     </div>
   );
 }

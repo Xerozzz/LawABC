@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import SupportedBy from "../components/SupportedBy.jsx";
 
 // NOTE: These are Singapore resources — verify and finalise with your programme
 // partners (HPB / school counsellors) before the pilot; numbers can change.
@@ -79,6 +80,8 @@ export default function Help() {
       <p className="muted" style={{ fontSize: "0.75rem" }}>
         ClearAir provides support and general information, not medical advice or crisis counselling.
       </p>
+
+      <SupportedBy />
     </div>
   );
 }
