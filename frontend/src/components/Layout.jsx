@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../api.js";
+import Icon from "./Icon.jsx";
 
 const leftTabs = [
-  { to: "/", icon: "🏠", label: "Home", end: true },
-  { to: "/progress", icon: "📈", label: "Progress" },
+  { to: "/", icon: "home", label: "Home", end: true },
+  { to: "/progress", icon: "chart", label: "Progress" },
 ];
 const rightTabs = [
-  { to: "/community", icon: "💬", label: "Community" },
-  { to: "/profile", icon: "👤", label: "Profile" },
+  { to: "/community", icon: "chat", label: "Community" },
+  { to: "/profile", icon: "user", label: "Profile" },
 ];
 
 export default function Layout() {
@@ -24,12 +25,16 @@ export default function Layout() {
   return (
     <>
       <header className="topbar">
-        <span className="brand">🌬️ ClearAir</span>
-        <div className="row" style={{ gap: "0.25rem" }}>
-          <button className="bell" onClick={() => navigate("/help")} aria-label="Get help" title="Get help">⛑️</button>
-          <button className="bell" onClick={() => navigate("/notifications")} aria-label="Notifications">
-            🔔
-            {unread > 0 && <span className="bell-badge">{unread > 9 ? "9+" : unread}</span>}
+        <span className="brand row" style={{ gap: "0.4rem" }}>
+          <Icon name="leaf" size={22} style={{ color: "var(--brand)" }} /> ClearAir
+        </span>
+        <div className="row" style={{ gap: "0.5rem" }}>
+          <button className="circle-btn" onClick={() => navigate("/help")} aria-label="Get help" title="Get help">
+            <Icon name="lifebuoy" size={19} style={{ color: "var(--text-dim)" }} />
+          </button>
+          <button className="circle-btn" onClick={() => navigate("/notifications")} aria-label="Notifications">
+            <Icon name="bell" size={19} style={{ color: "var(--text-dim)" }} />
+            {unread > 0 && <span className="dot" />}
           </button>
         </div>
       </header>
@@ -41,19 +46,18 @@ export default function Layout() {
       <nav className="bottom-nav">
         {leftTabs.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.end}>
-            <span className="ico">{t.icon}</span>
+            <Icon name={t.icon} size={22} />
             <span>{t.label}</span>
           </NavLink>
         ))}
 
         <button className="nav-sos" onClick={() => navigate("/sos")} aria-label="Craving SOS">
-          <span className="ico">🆘</span>
           <span>SOS</span>
         </button>
 
         {rightTabs.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.end}>
-            <span className="ico">{t.icon}</span>
+            <Icon name={t.icon} size={22} />
             <span>{t.label}</span>
           </NavLink>
         ))}

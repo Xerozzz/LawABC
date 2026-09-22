@@ -197,15 +197,14 @@ a { color: var(--brand); }
 
 .nav-sos {
   flex: 0 0 auto; margin: 0 0.3rem;
-  width: 56px; height: 56px; border-radius: 50%;
+  width: 58px; height: 58px; border-radius: 50%;
   transform: translateY(-12px);
   background: var(--danger);
-  color: #fff; font-weight: 600; font-size: 0.58rem;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  box-shadow: 0 4px 12px rgba(217, 72, 79, 0.32);
+  color: #fff; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.03em;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 14px rgba(217, 72, 79, 0.4);
   border: 3px solid #fff;
 }
-.nav-sos .ico { font-size: 1.2rem; }
 
 .stat { font-size: 2rem; font-weight: 700; line-height: 1.1; }
 .stat-label { color: var(--text-dim); font-size: 0.82rem; }
@@ -230,3 +229,66 @@ a { color: var(--brand); }
   font-size: 1.15rem; flex: 0 0 auto;
   background: var(--surface-2);
 }
+
+/* Circular top-bar buttons */
+.circle-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #fff; color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm); padding: 0; position: relative;
+}
+.circle-btn:hover { background: var(--surface-2); }
+.circle-btn .dot { position: absolute; top: 9px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 1.5px solid #fff; }
+
+/* Icon chip inside tiles/cards */
+.ico-chip {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+}
+
+/* Stat tiles row */
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+.tile {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 0.85rem 0.75rem; box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.tile .num { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.tile .lbl { font-size: 0.72rem; color: var(--text-dim); line-height: 1.25; }
+
+/* Daily mood check-in */
+.mood-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+.mood-btn {
+  border-radius: 12px; padding: 0.7rem 0.4rem; font-weight: 700; font-size: 0.85rem;
+  border: 1px solid var(--border-strong); background: #fff; color: var(--text); box-shadow: none;
+}
+.mood-btn.good { background: #e7f8f2; border-color: #bfe9db; color: #0b6b62; }
+.mood-btn.craving { background: var(--danger); border-color: var(--danger); color: #fff; }
+.mood-btn.selected { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* Week check-in strip */
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
+.week .cell { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+.week .dow { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; }
+.week .dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2); color: var(--text-dim); font-size: 0.72rem; font-weight: 700;
+}
+.week .dot.active { background: var(--brand); color: #fff; }
+.week .dot.opened { background: #fff; border: 1.5px dashed var(--brand); color: var(--brand); }
+.week .dot.now { background: #fff; border: 1.5px dashed var(--brand); color: var(--brand); font-size: 0.62rem; }
+
+/* Badge pill (inside hero) */
+.badge-pill {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: #fff; border-radius: 999px; padding: 0.5rem 0.9rem;
+  font-weight: 700; font-size: 0.82rem; color: var(--text); box-shadow: var(--shadow-sm);
+}
+
+/* Dark call-to-action card / button */
+.cta-dark {
+  background: #12212e; color: #fff; border: none; width: 100%;
+  border-radius: 12px; padding: 0.85rem; font-weight: 700;
+}
+.cta-dark:hover { background: #1b2f40; }
