@@ -48,8 +48,8 @@ export default function Notifications() {
         <strong>What we send (and when)</strong>
         <ul className="muted" style={{ margin: "0.5rem 0 0", paddingLeft: "1.1rem", fontSize: "0.85rem", lineHeight: 1.7 }}>
           <li>🌱 <strong>9am</strong> — a short morning boost to start the day</li>
-          <li>🌙 <strong>8pm</strong> — an evening check-in: log a craving or share a win</li>
-          <li>❤️ Health milestones, 🔥 streak days and 💰 savings goals — celebrated as you hit them</li>
+          <li>🌙 <strong>8pm</strong> — an evening check-in to keep your streak going</li>
+          <li>❤️ Health milestones (with a little affirmation), 🔥 check-in streaks and 💰 savings goals — celebrated as you hit them</li>
         </ul>
         <p className="muted" style={{ margin: "0.6rem 0 0", fontSize: "0.78rem" }}>
           That's it — no spam, nothing about vaping shows on your lock screen.
@@ -81,7 +81,7 @@ export default function Notifications() {
               <strong>{ICON[n.type] || "🔔"} {n.title}</strong>
               <span className="muted" style={{ fontSize: "0.72rem" }}>{timeAgo(n.created_at)}</span>
             </div>
-            <p className="muted" style={{ margin: "0.4rem 0 0" }}>{n.body}</p>
+            <p className="muted" style={{ margin: "0.4rem 0 0", whiteSpace: "pre-line" }}>{n.body}</p>
           </div>
         ))}
       </div>

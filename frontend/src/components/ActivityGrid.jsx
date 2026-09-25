@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import { useAuth } from "../AuthContext.jsx";
 import Icon from "./Icon.jsx";
 
 const DOW = ["S", "M", "T", "W", "T", "F", "S"];
@@ -36,6 +37,7 @@ const Key = ({ style, label }) => (
 );
 
 export default function ActivityGrid() {
+  const { features } = useAuth();
   const [data, setData] = useState(null);
   useEffect(() => { api.getActivity().then(setData).catch(() => {}); }, []);
   if (!data) return null;
@@ -46,7 +48,7 @@ export default function ActivityGrid() {
         <div>
           <strong>{data.totalDays}-day check-in</strong>
           <p className="muted" style={{ margin: "0.2rem 0 0", fontSize: "0.82rem" }}>
-            A day counts when you log, post or use SOS.
+            A day counts when you check in{features.community ? ", post" : ""} or use SOS.
           </p>
         </div>
         <div style={{ textAlign: "right" }}>

@@ -34,6 +34,9 @@ export const api = {
   login: (email, password) =>
     request("/auth/login", { method: "POST", body: { email, password } }),
 
+  // Which switchable features are on (e.g. community) — public, loaded at boot.
+  getConfig: () => request("/config"),
+
   getProfile: () => request("/profile"),
   updateProfile: (patch) => request("/profile", { method: "PUT", body: patch }),
   acceptConsent: () => request("/profile/consent", { method: "POST" }),
@@ -46,6 +49,9 @@ export const api = {
   // The user's own 14-day participation grid.
   getActivity: () => request("/events/activity"),
 
+  // 🔥 check-in streak + days vape-free.
+  getStreak: () => request("/streak"),
+
   getMilestones: () => request("/milestones"),
   getSavings: () => request("/savings"),
 
@@ -54,6 +60,11 @@ export const api = {
   getCravingStats: () => request("/cravings/stats"),
   deleteCraving: (id) => request(`/cravings/${id}`, { method: "DELETE" }),
   clearCravings: () => request("/cravings", { method: "DELETE" }),
+
+  getTriggers: () => request("/triggers"),
+  addTrigger: (trigger) => request("/triggers", { method: "POST", body: trigger }),
+  updateTrigger: (id, trigger) => request(`/triggers/${id}`, { method: "PUT", body: trigger }),
+  deleteTrigger: (id) => request(`/triggers/${id}`, { method: "DELETE" }),
 
   getNotifications: () => request("/notifications"),
   markNotificationsRead: () => request("/notifications/read", { method: "POST" }),

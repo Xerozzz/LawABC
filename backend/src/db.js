@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { milestones, MILESTONE_VERSION } from "./milestones.seed.js";
 import { seedDemoContent } from "./demo.seed.js";
+import { STREAK_GEMS } from "./rewards.catalog.js";
 
 const { Pool } = pg;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -57,9 +58,9 @@ export async function initDb() {
       const m = milestones[i];
       await query(
         `INSERT INTO health_milestones
-           (minutes_after_quit, time_label, title, description, source_citation, inferred, sort_order)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [m.minutes, m.time_label, m.title, m.description, m.source, !!m.inferred, i]
+           (minutes_after_quit, time_label, title, description, source_citation, inferred, sort_order, affirmation)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [m.minutes, m.time_label, m.title, m.description, m.source, !!m.inferred, i, m.affirmation ?? null]
       );
     }
     await query(
@@ -68,6 +69,32 @@ export async function initDb() {
       [MILESTONE_VERSION]
     );
     console.log(`Seeded ${milestones.length} health milestones (version ${MILESTONE_VERSION}).`);
+  }
+
+  // Affirmations are copy, not data: update them in place so existing milestone
+  // ids (and the notifications that point at them) survive a wording change.
+  for (let i = 0; i < milestones.length; i++) {
+    await query(
+      `UPDATE health_milestones SET affirmation = $1
+        WHERE sort_order = $2 AND affirmation IS DISTINCT FROM $1`,
+      [milestones[i].affirmation ?? null, i]
+    );
+  }
+
+  // One-off, when streak gems moved from days-since-quit to the check-in streak:
+  // keep the streak gems everyone had already earned, so no balance drops (or
+  // goes into a hidden debt that swallows the gems they earn next).
+  const { rows: gemsDone } = await query("SELECT 1 FROM app_meta WHERE key = 'legacy_streak_gems'");
+  if (!gemsDone[0]) {
+    const values = STREAK_GEMS.map((_, i) => `($${2 * i + 1}::int, $${2 * i + 2}::int)`).join(", ");
+    await query(
+      `UPDATE users u SET legacy_streak_gems = (
+         SELECT COALESCE(SUM(g.gems), 0)::int FROM (VALUES ${values}) AS g(days, gems)
+          WHERE FLOOR(EXTRACT(EPOCH FROM (NOW() - u.quit_date)) / 86400) >= g.days)
+        WHERE u.quit_date IS NOT NULL`,
+      STREAK_GEMS.flatMap((s) => [s.days, s.gems])
+    );
+    await query("INSERT INTO app_meta (key, value) VALUES ('legacy_streak_gems', 'done') ON CONFLICT (key) DO NOTHING");
   }
 
   await seedDemoContent();

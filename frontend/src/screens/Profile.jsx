@@ -4,7 +4,7 @@ import { api } from "../api.js";
 import { useAuth } from "../AuthContext.jsx";
 
 export default function Profile() {
-  const { user, logout, refreshProfile } = useAuth();
+  const { user, features, logout, refreshProfile } = useAuth();
   const [form, setForm] = useState(null);
   const [savedCard, setSavedCard] = useState(null); // 'profile' | 'savings'
   const [error, setError] = useState("");
@@ -75,7 +75,11 @@ export default function Profile() {
           {savedCard === "profile" && <span className="badge" style={{ color: "var(--success)" }}>✓ Saved</span>}
         </div>
         <div className="field">
-          <label>Display name (shown on community posts — leave blank to stay Anonymous)</label>
+          <label>
+            {features.community
+              ? "Display name (shown on community posts — leave blank to stay Anonymous)"
+              : "Display name (what the app calls you)"}
+          </label>
           <input maxLength={24} value={form.nickname} onChange={(e) => set("nickname", e.target.value)} placeholder="e.g. quitking_23" />
         </div>
         <div className="field">

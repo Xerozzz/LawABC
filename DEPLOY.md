@@ -9,7 +9,8 @@ It's intentionally simple and cheap — right-sized for a user-testing prototype
 - One `t3.small` instance in your default VPC, with an Elastic IP (stable address)
 - The app built and started automatically on first boot
 - Generated Postgres/JWT secrets (never committed)
-- Demo community content seeded so testers don't see an empty feed
+- Community **closed** (`COMMUNITY_ENABLED=false`) — no moderators during testing; demo posts are
+  still seeded so the feed isn't empty if you reopen it
 
 Rough cost: ~US$15/month for the instance while it's running, plus a few cents of storage. `terraform destroy` stops all charges.
 
@@ -40,11 +41,15 @@ sudo tail -f /var/log/cloud-init-output.log
 
 ## Test accounts
 
-Testers just tap **Sign up** and create their own account (email + password, low-friction). The community feed is pre-seeded with demo reflections.
+Testers just tap **Sign up** and create their own account (email + password, low-friction).
+
+The community is closed while testing (its tab is replaced by **Triggers**, and `/api/reflections`
+returns 403). To reopen it, set `COMMUNITY_ENABLED=true` in `/opt/clearair/.env` and restart the app:
+`docker compose -f docker-compose.prod.yml up -d`. The feed is pre-seeded with demo reflections.
 
 ## HTTPS / custom domain (needed for the map's live geolocation)
 
-Plain HTTP works for everything **except** "Check where I am now" on the Trigger Map and device notifications — browsers block geolocation/Notifications on insecure origins.
+Plain HTTP works for everything **except** "Check where I am now" on the Trigger Map and device notifications — browsers block geolocation/Notifications on insecure origins. (Adding triggers and pinning them by tapping the map works on plain HTTP.)
 
 **With a domain:**
 1. Point a domain's **DNS A record** at the Elastic IP from `terraform output public_ip`.

@@ -1,20 +1,21 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth } from "../auth.js";
+import { vapeFreeSpan } from "../streak.js";
 
 const router = Router();
 
-// Returns the milestone timeline annotated with the user's progress.
+// Returns the milestone timeline annotated with the user's progress. These are
+// "time since nicotine" milestones, so they count from the current vape-free
+// stretch: the quit date, or the last logged vape (streak.js).
 router.get("/", requireAuth, async (req, res) => {
-  const [{ rows: users }, { rows: milestones }] = await Promise.all([
-    query("SELECT quit_date FROM users WHERE id = $1", [req.user.id]),
+  const [span, { rows: milestones }] = await Promise.all([
+    vapeFreeSpan(req.user.id),
     query("SELECT * FROM health_milestones ORDER BY sort_order ASC"),
   ]);
 
-  const quitDate = users[0]?.quit_date;
-  const minutesQuit = quitDate
-    ? Math.max(0, (Date.now() - new Date(quitDate).getTime()) / 60000)
-    : 0;
+  const since = span?.since;
+  const minutesQuit = since ? Math.max(0, (Date.now() - since.getTime()) / 60000) : 0;
 
   let nextFound = false;
   const timeline = milestones.map((m) => {
@@ -36,13 +37,21 @@ router.get("/", requireAuth, async (req, res) => {
       description: m.description,
       source: m.source_citation,
       inferred: m.inferred,
+      affirmation: m.affirmation,
       achieved,
       isNext,
       progress: Number(progress.toFixed(3)),
     };
   });
 
-  res.json({ minutesQuit: Math.floor(minutesQuit), timeline });
+  res.json({
+    minutesQuit: Math.floor(minutesQuit),
+    // set when a logged vape restarted the count (the UI says so, kindly)
+    restartedAt: span?.restarted ? since.toISOString() : null,
+    // set while the quit date is still ahead: the timeline starts then
+    startsAt: since && since.getTime() > Date.now() ? since.toISOString() : null,
+    timeline,
+  });
 });
 
 export default router;

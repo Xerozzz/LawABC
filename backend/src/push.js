@@ -74,8 +74,8 @@ async function sendToAll(payload) {
 
 // Daily rhythm. Times are in the server's timezone — set TZ (e.g. Asia/Singapore).
 const SLOTS = [
-  { hour: 9, key: "push_sent_morning", title: "Good morning 🌱", body: "A fresh vape-free day ahead. You've got this." },
-  { hour: 20, key: "push_sent_evening", title: "Evening check-in 🌙", body: "How did today go? Log a craving or share a win." },
+  { hour: 9, key: "push_sent_morning", title: "Good morning 🌱", body: "A fresh day ahead. You've got this." },
+  { hour: 20, key: "push_sent_evening", title: "Evening check-in 🌙", body: "How did today go? One tap keeps your streak going." },
 ];
 
 function startScheduler() {

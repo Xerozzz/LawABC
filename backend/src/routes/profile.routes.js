@@ -80,9 +80,10 @@ router.post("/consent", requireAuth, async (req, res) => {
 
 // Export all of the user's data (privacy / data-portability).
 router.get("/export", requireAuth, async (req, res) => {
-  const [profile, cravings, reflections, notifications, events] = await Promise.all([
+  const [profile, cravings, triggers, reflections, notifications, events] = await Promise.all([
     query("SELECT id, email, nickname, quit_date, weekly_spend, savings_goal_label, savings_goal_amount, consent_location, consent_share, consent_accepted_at, created_at FROM users WHERE id = $1", [req.user.id]),
-    query("SELECT id, occurred_at, tool_used, outcome, lat, lng, context FROM craving_events WHERE user_id = $1 ORDER BY occurred_at", [req.user.id]),
+    query("SELECT id, occurred_at, tool_used, outcome, lat, lng, context, trigger_id FROM craving_events WHERE user_id = $1 ORDER BY occurred_at", [req.user.id]),
+    query("SELECT id, label, kind, plan, lat, lng, created_at FROM triggers WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
     query("SELECT id, milestone_id, body, status, created_at FROM reflections WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
     query("SELECT id, type, title, body, created_at, read_at FROM notifications WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
     query("SELECT id, type, meta, created_at FROM events WHERE user_id = $1 ORDER BY created_at", [req.user.id]),
@@ -91,6 +92,7 @@ router.get("/export", requireAuth, async (req, res) => {
     exportedAt: new Date().toISOString(),
     profile: profile.rows[0],
     cravings: cravings.rows,
+    triggers: triggers.rows,
     reflections: reflections.rows,
     notifications: notifications.rows,
     events: events.rows,

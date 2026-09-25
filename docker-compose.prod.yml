@@ -31,6 +31,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       DATABASE_URL: postgres://${POSTGRES_USER:-clearair}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-clearair}
       DEMO_SEED: ${DEMO_SEED:-true}
+      COMMUNITY_ENABLED: ${COMMUNITY_ENABLED:-false}
       ADMIN_TOKEN: ${ADMIN_TOKEN:-}
       STUDY_DAYS: ${STUDY_DAYS:-14}
       STUDY_TZ: ${STUDY_TZ:-Asia/Singapore}

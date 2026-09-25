@@ -7,23 +7,39 @@ export default function Privacy() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [cravings, setCravings] = useState([]);
+  const [triggers, setTriggers] = useState([]);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
-  const load = () => api.getCravings().then(setCravings).catch((e) => setError(e.message));
+  const load = () => {
+    api.getCravings().then(setCravings).catch((e) => setError(e.message));
+    api.getTriggers().then(setTriggers).catch((e) => setError(e.message));
+  };
   useEffect(() => { load(); }, []);
 
   const located = cravings.filter((c) => c.lat != null && c.lng != null);
+  const pinned = triggers.filter((t) => t.lat != null && t.lng != null);
 
   const deleteOne = async (id) => {
     await api.deleteCraving(id).catch((e) => setError(e.message));
     load();
   };
 
+  // Removes the pin only — the trigger and its plan stay.
+  const unpin = async (t) => {
+    await api.updateTrigger(t.id, { label: t.label, kind: t.kind, plan: t.plan, lat: null, lng: null })
+      .catch((e) => setError(e.message));
+    load();
+  };
+
   const clearAll = async () => {
-    if (!window.confirm("Delete ALL your craving and location history? This can't be undone.")) return;
-    await api.clearCravings().catch((e) => setError(e.message));
-    setMsg("Craving and location history cleared.");
+    if (!window.confirm("Delete ALL your craving and location history, including pinned trigger spots? This can't be undone.")) return;
+    try {
+      await api.clearCravings();
+      setMsg("Craving and location history cleared.");
+    } catch (e) {
+      setError(e.message);
+    }
     load();
   };
 
@@ -70,13 +86,14 @@ export default function Privacy() {
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Location history</h3>
         <p className="muted" style={{ marginTop: 0 }}>
-          {located.length} craving{located.length === 1 ? "" : "s"} with a saved location.
+          {located.length} craving{located.length === 1 ? "" : "s"} with a saved location
+          {pinned.length > 0 && `, ${pinned.length} pinned trigger spot${pinned.length === 1 ? "" : "s"}`}.
         </p>
         <div className="stack">
           {located.map((c) => (
             <div key={c.id} className="row" style={{ justifyContent: "space-between" }}>
               <span style={{ fontSize: "0.85rem" }}>
-                {c.context || "Craving"} · {new Date(c.occurred_at).toLocaleDateString()}
+                {c.trigger_label || c.context || "Craving"} · {new Date(c.occurred_at).toLocaleDateString()}
                 <br />
                 <span className="muted" style={{ fontSize: "0.72rem" }}>
                   {c.lat.toFixed(4)}, {c.lng.toFixed(4)}
@@ -87,7 +104,21 @@ export default function Privacy() {
               </button>
             </div>
           ))}
-          {located.length === 0 && <span className="muted" style={{ fontSize: "0.85rem" }}>No saved locations.</span>}
+          {pinned.map((t) => (
+            <div key={`t${t.id}`} className="row" style={{ justifyContent: "space-between" }}>
+              <span style={{ fontSize: "0.85rem" }}>
+                Pinned trigger · {t.label}
+                <br />
+                <span className="muted" style={{ fontSize: "0.72rem" }}>
+                  {t.lat.toFixed(4)}, {t.lng.toFixed(4)}
+                </span>
+              </span>
+              <button className="ghost" style={{ padding: "0.3rem 0.7rem" }} title="Remove this pin" onClick={() => unpin(t)}>
+                ✕
+              </button>
+            </div>
+          ))}
+          {located.length === 0 && pinned.length === 0 && <span className="muted" style={{ fontSize: "0.85rem" }}>No saved locations.</span>}
         </div>
       </div>
 

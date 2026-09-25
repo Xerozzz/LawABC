@@ -75,10 +75,11 @@ router.get("/users/:id/logs", async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id)) return res.status(400).json({ error: "Bad user id" });
 
-  const [user, events, cravings, reflections, joins, unlocks, notifications] = await Promise.all([
+  const [user, events, cravings, triggers, reflections, joins, unlocks, notifications] = await Promise.all([
     query("SELECT id, email, nickname, quit_date, weekly_spend, onboarded, consent_accepted_at, created_at FROM users WHERE id = $1", [id]),
     query("SELECT id, type, meta, created_at FROM events WHERE user_id = $1 ORDER BY created_at", [id]),
-    query("SELECT id, occurred_at, tool_used, outcome, lat, lng, context FROM craving_events WHERE user_id = $1 ORDER BY occurred_at", [id]),
+    query("SELECT id, occurred_at, tool_used, outcome, lat, lng, context, trigger_id FROM craving_events WHERE user_id = $1 ORDER BY occurred_at", [id]),
+    query("SELECT id, label, kind, plan, lat, lng, created_at FROM triggers WHERE user_id = $1 ORDER BY created_at", [id]),
     query("SELECT id, milestone_id, body, status, channel, prompt_id, created_at FROM reflections WHERE user_id = $1 ORDER BY created_at", [id]),
     query("SELECT reflection_id, created_at FROM reflection_joins WHERE user_id = $1 ORDER BY created_at", [id]),
     query("SELECT item_key, created_at FROM unlocks WHERE user_id = $1 ORDER BY created_at", [id]),
@@ -91,6 +92,7 @@ router.get("/users/:id/logs", async (req, res) => {
     activity: await getUserActivity(id),
     events: events.rows,
     cravings: cravings.rows,
+    triggers: triggers.rows,
     reflections: reflections.rows,
     joins: joins.rows,
     unlocks: unlocks.rows,

@@ -35,7 +35,8 @@ export default function Community() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => { api.getDailyPrompt().then(setPrompt).catch(() => {}); }, []);
+  // Errors show (e.g. "The community is closed for now." if it's switched off while the app is open).
+  useEffect(() => { api.getDailyPrompt().then(setPrompt).catch((e) => setError(e.message)); }, []);
 
   const load = () => {
     const params = active === "prompt" ? { promptId: prompt?.id } : { channel: active };

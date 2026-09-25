@@ -27,6 +27,7 @@ services:
       PORT: 4000
       TZ: ${TZ:-Asia/Singapore}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      COMMUNITY_ENABLED: ${COMMUNITY_ENABLED:-false}
       DATABASE_URL: postgres://${POSTGRES_USER:-lawabc}:${POSTGRES_PASSWORD:-lawabc_password}@db:5432/${POSTGRES_DB:-lawabc}
       ADMIN_TOKEN: ${ADMIN_TOKEN:-}
       STUDY_DAYS: ${STUDY_DAYS:-14}

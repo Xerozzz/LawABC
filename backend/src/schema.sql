@@ -23,6 +23,11 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '🌱';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS theme  TEXT DEFAULT 'default';
 -- Optional display name for community posts (still no real identity exposed).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname TEXT;
+-- Longest check-in streak ever reached (high-water mark, see streak.js).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS best_streak INT NOT NULL DEFAULT 0;
+-- Streak gems already earned under the old days-since-quit rule, kept when
+-- streak gems moved to check-ins (set once by db.js, see rewards.routes.js).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS legacy_streak_gems INT NOT NULL DEFAULT 0;
 
 -- Cosmetic items a user has unlocked with gems (avatars, themes).
 CREATE TABLE IF NOT EXISTS unlocks (
@@ -47,6 +52,8 @@ CREATE TABLE IF NOT EXISTS health_milestones (
 );
 -- Migration for DBs created before `inferred` existed.
 ALTER TABLE health_milestones ADD COLUMN IF NOT EXISTS inferred BOOLEAN DEFAULT FALSE;
+-- A short, encouraging line shown with the milestone (kept in sync by db.js).
+ALTER TABLE health_milestones ADD COLUMN IF NOT EXISTS affirmation TEXT;
 
 -- Small key/value store for app metadata (e.g. seed version, VAPID keys).
 CREATE TABLE IF NOT EXISTS app_meta (
@@ -72,6 +79,26 @@ CREATE TABLE IF NOT EXISTS craving_events (
   lng             DOUBLE PRECISION,
   context         TEXT
 );
+
+-- The user's own triggers (feelings, places, people, times) and their plan for
+-- each. A trigger can optionally be pinned to a spot on the trigger map.
+CREATE TABLE IF NOT EXISTS triggers (
+  id              SERIAL PRIMARY KEY,
+  user_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label           TEXT NOT NULL,
+  kind            TEXT NOT NULL DEFAULT 'other',  -- 'feeling' | 'place' | 'people' | 'time' | 'other'
+  plan            TEXT,                           -- "when this happens, I'll…"
+  lat             DOUBLE PRECISION,
+  lng             DOUBLE PRECISION,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+-- One trigger per name per user (case-insensitive); also the per-user lookup index.
+CREATE UNIQUE INDEX IF NOT EXISTS triggers_user_label_uq ON triggers (user_id, lower(label));
+-- Which of the user's triggers set a craving off (optional, tagged in Craving SOS).
+ALTER TABLE craving_events ADD COLUMN IF NOT EXISTS trigger_id INT REFERENCES triggers(id) ON DELETE SET NULL;
+-- Per-user history lookups (streak, trigger map, participation), and per-trigger counts.
+CREATE INDEX IF NOT EXISTS craving_events_user_time_idx ON craving_events (user_id, occurred_at);
+CREATE INDEX IF NOT EXISTS craving_events_trigger_idx ON craving_events (trigger_id);
 
 CREATE TABLE IF NOT EXISTS reflections (
   id              SERIAL PRIMARY KEY,
@@ -103,6 +130,7 @@ CREATE TABLE IF NOT EXISTS events (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS events_type_time_idx ON events (type, created_at);
+CREATE INDEX IF NOT EXISTS events_user_time_idx ON events (user_id, created_at);
 
 -- Event-based notifications (milestone reached, savings goal, streaks).
 -- ref_key makes generation idempotent: we only insert a given notification once.
@@ -110,7 +138,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   id              SERIAL PRIMARY KEY,
   user_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type            TEXT NOT NULL,        -- 'milestone' | 'streak' | 'goal'
-  ref_key         TEXT NOT NULL,        -- e.g. 'milestone:5', 'streak:7', 'goal'
+  ref_key         TEXT NOT NULL,        -- e.g. 'milestone:5', 'streak:7:2026-09-01', 'goal'
   title           TEXT NOT NULL,
   body            TEXT NOT NULL,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -17,9 +17,12 @@ Each day lands in one of three states:
 
 A deliberate action is any of:
 
+- checking in on Home ("How is today going?" — the one-tap `daily_checkin`)
 - logging a craving through Craving SOS (`craving_events`)
 - finishing a breathing exercise, playing a game, watching a video, reading a story
-- posting in the community, or joining someone's post
+- posting in the community, or joining someone's post (the community is closed
+  while testing — `COMMUNITY_ENABLED=false` — so this doesn't apply by default)
+- adding or editing a trigger
 - updating the profile, opening notifications, unlocking a shop item
 
 Opening the app and immediately closing it does **not** count. That distinction is
@@ -74,7 +77,15 @@ filter — and a participant can verify the same number from their own grid.
 ## What participants see
 
 The Progress screen shows each participant their own 14-day grid: active days
-filled, opened-only days dashed, current run, and the same rule text as above.
+filled, opened-only days dashed, and the same rule text as above.
+
+The 🔥 streak on Home uses the same "active day" rule, with one difference: a day
+on which they log "I vaped" (in Craving SOS, or "Vaped today? Log it honestly" on
+Home, stored as a craving with `tool_used = 'checkin'`) breaks the streak (it still counts as
+an active day for participation — logging a slip honestly is engagement). Days
+vape-free and the health-recovery milestones (they are "time since nicotine"
+facts) also restart from a logged vape; money saved keeps counting from the quit
+date. See `backend/src/streak.js`.
 
 This drives compliance, but be aware it also makes the target visible — expect
 some late-evening token actions. Read the qualitative feedback with that in mind.

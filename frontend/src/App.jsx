@@ -20,7 +20,7 @@ import Shop from "./screens/Shop.jsx";
 import Profile from "./screens/Profile.jsx";
 
 export default function App() {
-  const { user, loading } = useAuth();
+  const { user, features, loading } = useAuth();
 
   // Apply the user's chosen theme (falls back to default when logged out).
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function App() {
         <Route path="/health" element={<Navigate to="/progress" replace />} />
         <Route path="/timeline" element={<Navigate to="/progress" replace />} />
         <Route path="/savings" element={<Savings />} />
-        <Route path="/community" element={<Community />} />
+        <Route path="/community" element={features.community ? <Community /> : <Navigate to="/" replace />} />
         <Route path="/triggers" element={<TriggerMap />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/help" element={<Help />} />

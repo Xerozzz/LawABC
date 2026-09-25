@@ -1,8 +1,12 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth } from "../auth.js";
+import { requireFeature } from "../features.js";
 
 const router = Router();
+
+// The whole community (feed, posts, joins, reports, prompt) is switchable.
+router.use(requireFeature("community"));
 
 // Topic channels (online-only). Keep this list in sync with the frontend.
 export const CHANNELS = ["general", "sports", "events", "cravings", "wins", "advice", "vent"];

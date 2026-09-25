@@ -5,7 +5,7 @@ import { useAuth } from "../AuthContext.jsx";
 
 export default function Shop() {
   const navigate = useNavigate();
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, features } = useAuth();
   const [data, setData] = useState(null);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
@@ -75,9 +75,15 @@ export default function Shop() {
         <div className="card">
           <strong>How you earn gems</strong>
           <ul className="muted" style={{ margin: "0.5rem 0 0", paddingLeft: "1.1rem", fontSize: "0.85rem", lineHeight: 1.7 }}>
-            <li>🔥 Streak days — bonus at 1, 3, 7, 14, 30, 60, 100, 365 <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.streaks}</span></li>
+            <li>
+              🔥 Check-in streak — bonus at 1, 3, 7, 14, 30, 60, 100, 365 days (best: {data.breakdown.bestStreak ?? 0}
+              {data.breakdown.legacyStreakGems > 0 && data.breakdown.streaks === data.breakdown.legacyStreakGems ? ", earlier streak bonus kept" : ""})
+              <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.streaks}</span>
+            </li>
             <li>💪 2 per craving beaten ({data.breakdown.beaten} so far) <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.cravings}</span></li>
-            <li>💬 3 per community post ({data.breakdown.posts} so far) <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.reflections}</span></li>
+            {(features.community || data.breakdown.posts > 0) && (
+              <li>💬 3 per community post ({data.breakdown.posts} so far) <span style={{ float: "right", fontWeight: 700 }}>+{data.breakdown.reflections}</span></li>
+            )}
           </ul>
         </div>
       )}

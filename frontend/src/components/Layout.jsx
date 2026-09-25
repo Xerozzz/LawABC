@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../api.js";
+import { useAuth } from "../AuthContext.jsx";
 import Icon from "./Icon.jsx";
 
 const leftTabs = [
   { to: "/", icon: "home", label: "Home", end: true },
   { to: "/progress", icon: "chart", label: "Progress" },
 ];
-const rightTabs = [
-  { to: "/community", icon: "chat", label: "Community" },
-  { to: "/profile", icon: "user", label: "Profile" },
-];
+// While the community is closed, its slot goes to the user's own triggers.
+const communityTab = { to: "/community", icon: "chat", label: "Community" };
+const triggersTab = { to: "/triggers", icon: "pin", label: "Triggers" };
+const profileTab = { to: "/profile", icon: "user", label: "Profile" };
 
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { features } = useAuth();
   const [unread, setUnread] = useState(0);
+  const rightTabs = [features.community ? communityTab : triggersTab, profileTab];
 
   useEffect(() => {
     api.getNotifications().then((d) => setUnread(d.unread)).catch(() => {});

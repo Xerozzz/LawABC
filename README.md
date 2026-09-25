@@ -73,9 +73,11 @@ npm run dev
 - **Auth & onboarding** — sign up, set quit date, weekly spend, and a savings goal
 - **Health Recovery Timeline** — milestone progress from a researched, cited **vaping-specific** dataset (`milestones.seed.js`); items extrapolated from smoking data are flagged as inferred
 - **Savings Tracker** — real-time savings since quitting + goal progress
-- **Craving SOS** — 60-second breathing exercise, tap mini-game, or motivational story, then logs the outcome (with optional location)
-- **Trigger Map** — Leaflet map of where cravings happened + a proximity warning near past trigger spots
-- **Anonymous Peer Support** — post/read reflections; author identity is never exposed; basic report-to-hide moderation
+- **Craving SOS** — 60-second breathing exercise, tap mini-game, or motivational story, then logs the outcome (with optional location); tag what set it off from your own triggers and see your plan for it
+- **Check-in streak** — 🔥 streak grows only on days you check in and resets when you log a vape or miss a day; "days vape-free" and health recovery restart from a logged vape, money saved doesn't (`streak.js`)
+- **My triggers + Trigger Map** — add your own triggers (feeling / place / people / time) with a plan for each, optionally pinned on the map by tapping it; Leaflet map of pins + where cravings happened, with a proximity warning near them
+- **Health affirmations** — each health milestone comes with a short affirmation, shown on Progress and in the milestone notification
+- **Anonymous Peer Support** — post/read reflections; author identity is never exposed; basic report-to-hide moderation. **Closed by default** while testing (`COMMUNITY_ENABLED=false`): the tab becomes Triggers and the API returns 403
 - **Notifications** — milestone / streak / savings-goal celebrations, in-app feed + bell badge, optional device notifications
 - **Privacy & data** — view/delete location history, export all data as JSON, delete account (cascades all data)
 
@@ -84,6 +86,7 @@ npm run dev
 | Method | Path                        | Auth | Description                          |
 |--------|-----------------------------|------|--------------------------------------|
 | GET    | `/api/health`               | no   | Liveness check                       |
+| GET    | `/api/config`               | no   | Feature switches (`community`)       |
 | POST   | `/api/auth/register`        | no   | Create account → `{ token, user }`   |
 | POST   | `/api/auth/login`           | no   | Log in → `{ token, user }`           |
 | GET    | `/api/profile`              | yes  | Current user profile                 |
@@ -92,14 +95,19 @@ npm run dev
 | DELETE | `/api/profile`              | yes  | Delete account + all data (cascade)  |
 | GET    | `/api/milestones`           | yes  | Timeline with per-user progress      |
 | GET    | `/api/savings`              | yes  | Savings + goal progress              |
-| POST   | `/api/cravings`             | yes  | Log a craving event                  |
+| GET    | `/api/streak`               | yes  | 🔥 check-in streak + days vape-free  |
+| GET    | `/api/triggers`             | yes  | Your triggers (+ times tagged)       |
+| POST   | `/api/triggers`             | yes  | Add a trigger (label, kind, plan, pin) |
+| PUT    | `/api/triggers/:id`         | yes  | Edit a trigger (null lat/lng = unpin) |
+| DELETE | `/api/triggers/:id`         | yes  | Delete a trigger                     |
+| POST   | `/api/cravings`             | yes  | Log a craving event (optional `triggerId`) |
 | GET    | `/api/cravings`             | yes  | Craving history                      |
 | GET    | `/api/cravings/stats`       | yes  | Totals for dashboard                 |
 | DELETE | `/api/cravings/:id`         | yes  | Delete one craving (privacy)         |
-| DELETE | `/api/cravings`             | yes  | Clear all craving/location history   |
+| DELETE | `/api/cravings`             | yes  | Clear all craving/location history (incl. trigger pins) |
 | GET    | `/api/notifications`        | yes  | Feed + unread count (auto-generates) |
 | POST   | `/api/notifications/read`   | yes  | Mark all notifications read          |
-| GET    | `/api/reflections`          | yes  | Anonymous reflection feed            |
+| GET    | `/api/reflections`          | yes  | Anonymous reflection feed (403 while community is closed) |
 | POST   | `/api/reflections`          | yes  | Post an anonymous reflection         |
 | POST   | `/api/reflections/:id/report` | yes | Report → hide a reflection          |
 | POST   | `/api/events`               | yes  | Log an analytics event               |

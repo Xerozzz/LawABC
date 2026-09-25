@@ -2,26 +2,32 @@ import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth } from "../auth.js";
 import { CATALOG, FREE_KEYS, byKey, STREAK_GEMS } from "../rewards.catalog.js";
+import { getStreak } from "../streak.js";
 
 const router = Router();
 
 // Gems earned = streak milestones + engagement (cravings beaten, reflections).
+// Streak gems use the BEST check-in streak ever (streak.js), not the current
+// one, so a slip resets the streak without taking back gems already earned —
+// and never less than what the old days-since-quit rule had already given
+// (legacy_streak_gems, set once on upgrade by db.js).
 async function computeEarned(userId) {
-  const [{ rows: u }, { rows: cr }, { rows: re }] = await Promise.all([
-    query("SELECT quit_date FROM users WHERE id = $1", [userId]),
+  const [streak, { rows: u }, { rows: cr }, { rows: re }] = await Promise.all([
+    getStreak(userId),
+    query("SELECT legacy_streak_gems FROM users WHERE id = $1", [userId]),
     query("SELECT COUNT(*) FILTER (WHERE outcome <> 'vaped')::int AS beaten FROM craving_events WHERE user_id = $1", [userId]),
     query("SELECT COUNT(*)::int AS n FROM reflections WHERE user_id = $1", [userId]),
   ]);
-  let streaks = 0;
-  if (u[0]?.quit_date) {
-    const days = Math.floor((Date.now() - new Date(u[0].quit_date).getTime()) / 86400000);
-    for (const s of STREAK_GEMS) if (days >= s.days) streaks += s.gems;
-  }
+  const bestStreak = streak?.best ?? 0;
+  const legacyStreakGems = u[0]?.legacy_streak_gems ?? 0;
+  let fromStreak = 0;
+  for (const s of STREAK_GEMS) if (bestStreak >= s.days) fromStreak += s.gems;
+  const streaks = Math.max(legacyStreakGems, fromStreak);
   const cravings = cr[0].beaten * 2;
   const reflections = re[0].n * 3;
   return {
     total: streaks + cravings + reflections,
-    breakdown: { streaks, cravings, reflections, beaten: cr[0].beaten, posts: re[0].n },
+    breakdown: { streaks, cravings, reflections, beaten: cr[0].beaten, posts: re[0].n, bestStreak, legacyStreakGems },
   };
 }
 

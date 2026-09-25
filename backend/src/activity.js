@@ -17,7 +17,7 @@ export const STUDY_START_DATE = process.env.STUDY_START_DATE || null;
 
 // Every source of "the user did something", unioned into one shape.
 // screen_view is the only passive signal; everything else is a real action.
-const ACTIVITY_SOURCES = `
+export const ACTIVITY_SOURCES = `
   SELECT user_id, created_at  AS at, (type <> 'screen_view') AS is_action, type AS kind FROM events
   UNION ALL
   SELECT user_id, occurred_at AS at, TRUE, 'craving_logged'   FROM craving_events
@@ -31,7 +31,7 @@ const ACTIVITY_SOURCES = `
 
 // Dates are passed around as plain 'YYYY-MM-DD' strings in STUDY_TZ. Casting to
 // text in SQL avoids node-pg turning DATE into a local-midnight JS Date.
-const addDays = (ymd, n) => {
+export const addDays = (ymd, n) => {
   const [y, m, d] = ymd.split("-").map(Number);
   const t = new Date(Date.UTC(y, m - 1, d) + n * 86400000);
   return t.toISOString().slice(0, 10);

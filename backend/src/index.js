@@ -1,3 +1,4 @@
+import "./async-errors.js"; // before anything registers routes
 import express from "express";
 import cors from "cors";
 import { existsSync } from "node:fs";
@@ -19,6 +20,9 @@ import eventsRoutes from "./routes/events.routes.js";
 import rewardsRoutes from "./routes/rewards.routes.js";
 import pushRoutes from "./routes/push.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import streakRoutes from "./routes/streak.routes.js";
+import triggersRoutes from "./routes/triggers.routes.js";
+import { FEATURES } from "./features.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,6 +32,12 @@ app.use(express.json());
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", service: "clearair-backend" });
+});
+
+// Which switchable features are on (see features.js). Public: the app needs it
+// to lay out its tabs, and it holds nothing about any user.
+app.get("/api/config", (_req, res) => {
+  res.json({ features: FEATURES });
 });
 
 app.use("/api/auth", authRoutes);
@@ -41,6 +51,8 @@ app.use("/api/events", eventsRoutes);
 app.use("/api/rewards", rewardsRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/streak", streakRoutes);
+app.use("/api/triggers", triggersRoutes);
 
 // In production the built frontend is copied to ./public and served from the
 // same origin as the API. The SPA fallback returns index.html for client routes
@@ -53,6 +65,15 @@ if (existsSync(publicDir)) {
   });
   console.log("Serving static frontend from ./public");
 }
+
+// Last stop for errors: bad JSON bodies, and failed async handlers (async-errors.js).
+// Answer the one request instead of letting the error take the server down.
+app.use((err, req, res, _next) => {
+  const status = err.status >= 400 && err.status < 500 ? err.status : 500;
+  if (status === 500) console.error(`${req.method} ${req.originalUrl} failed:`, err);
+  if (res.headersSent) return;
+  res.status(status).json({ error: status === 500 ? "Something went wrong. Please try again." : "Bad request" });
+});
 
 // Start only after the DB is ready (schema + seed applied).
 async function start() {

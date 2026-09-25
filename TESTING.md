@@ -20,7 +20,8 @@ that youths lack at home — and will they actually use it to quit vaping?
 | RQ1 | Can youths sign up and set up a quit plan without help? | Consent, onboarding |
 | RQ2 | When a craving hits, does the app help them get through it? | Craving SOS, trigger map |
 | RQ3 | Do the progress tools feel motivating enough to come back to? | Health timeline, savings, notifications |
-| RQ4 | Does the anonymous community feel safe and supportive? | Peer reflections |
+| RQ4 | Does the anonymous community feel safe and supportive? *(only if `COMMUNITY_ENABLED=true` — closed by default while testing)* | Peer reflections |
+| RQ4b | Do youths recognise their own triggers, and does having a plan ready help? | My triggers, Craving SOS |
 | RQ5 | Do youths trust the app with their data? | Consent, privacy controls |
 | RQ6 | Does the help/crisis signposting work and feel appropriate? | Help screen |
 | RQ7 | Between touchpoints, do they keep using it? | Overall engagement (analytics) |
@@ -78,7 +79,8 @@ Non-negotiable for this population. Confirm with the school / programme / an eth
   3. Escalate per the school's safeguarding policy; for immediate danger, emergency services (995).
   Have the counsellor present or on-call for youth sessions.
 - **No coercive incentives.** Modest thank-you only, and never contingent on "using it more."
-- **Anonymity:** reassure participants that community reflections are anonymous to other users.
+- **Anonymity:** reassure participants that community reflections are anonymous to other users
+  (only relevant if the community is switched on — it is closed by default while testing).
 
 ---
 
@@ -91,10 +93,14 @@ Observe silently; use think-aloud prompts ("what are you expecting here?").
    → consent, onboarding (quit date, spend, goal)
 2. **Beat a craving.** "Imagine you just got a strong urge to vape. Use the app to get through the
    next minute." → Craving SOS (breathing / game / story) + check-in
+   *(Follow-up: "Say you did vape today — how would you tell the app?" → "I vaped" in SOS, or
+   "Vaped today? Log it honestly" on Home. Watch how they react to the streak resetting.)*
 3. **See your progress.** "Find out what's improving in your body since you stopped." → Health timeline
 4. **Money saved.** "Check how much you've saved, and set something you're saving toward." → Savings
-5. **You're not alone.** "See what others going through this have said, and share something yourself."
-   → Community
+5. **Know your triggers.** "Add something that usually sets off a craving for you, and what you'll do
+   instead. Then use SOS and say what set it off." → My triggers (Triggers tab) + Craving SOS
+   *(If `COMMUNITY_ENABLED=true`: "See what others going through this have said, and share something
+   yourself." → Community)*
 6. **Get real help.** "You're worried about a friend who's struggling — find proper support." → Help
 7. **Your data, your call.** "You've decided you want your information removed." → Privacy & data
 
@@ -153,7 +159,7 @@ Example queries in §8.
 
 ### 7c. Post-pilot survey (5–10 min)
 - Overall, how helpful was ClearAir in your effort to quit? (1–5)
-- Which feature helped most? (Craving SOS / Health timeline / Savings / Community / Notifications / Trigger map)
+- Which feature helped most? (Craving SOS / Check-in streak / Health timeline / Savings / My triggers & map / Notifications)
 - The Craving SOS helped me get through urges. (1–5)
 - I felt my information was private and safe. (1–5)
 - I would recommend ClearAir to a friend trying to quit. (0–10)

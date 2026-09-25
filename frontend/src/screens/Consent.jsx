@@ -30,8 +30,9 @@ export default function Consent() {
           <strong>What we store</strong>
           <p className="muted" style={{ margin: "0.3rem 0 0" }}>
             Your email, your quit date and spending (to show progress and savings), the cravings
-            you log, any reflections you post, and which features you use. Location is stored
-            <strong> only</strong> if you turn it on for the trigger map.
+            you log, the triggers you add, any reflections you post, and which features you use.
+            Location is stored <strong>only</strong> if you turn it on for the trigger map or pin a
+            spot yourself.
           </p>
         </div>
         <div>

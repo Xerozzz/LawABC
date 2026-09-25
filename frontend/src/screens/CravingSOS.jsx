@@ -6,6 +6,7 @@ import BreathingExercise from "../components/BreathingExercise.jsx";
 import GamePicker from "../components/GamePicker.jsx";
 import MotivationalStory from "../components/MotivationalStory.jsx";
 import RandomVideo from "../components/RandomVideo.jsx";
+import TriggerPicker from "../components/TriggerPicker.jsx";
 import Icon from "../components/Icon.jsx";
 
 const TOOLS = [
@@ -24,9 +25,19 @@ export default function CravingSOS() {
   const [tool, setTool] = useState(null);
   const [stats, setStats] = useState(null);
   const [left, setLeft] = useState(TOTAL);
+  const [triggers, setTriggers] = useState(null); // null until loaded
+  const [triggerId, setTriggerId] = useState(null);
   const startedAt = useRef(null);
 
-  useEffect(() => { api.getCravingStats().then(setStats).catch(() => {}); }, []);
+  useEffect(() => {
+    api.getCravingStats().then(setStats).catch(() => {});
+    api.getTriggers().then(setTriggers).catch(() => setTriggers([]));
+  }, []);
+  // A just-added trigger may be one they already had (the API returns it), so replace by id.
+  const addTrigger = (t) => setTriggers((ts) => [...(ts || []).filter((x) => x.id !== t.id), t]);
+  const picker = (title) => triggers && (
+    <TriggerPicker triggers={triggers} value={triggerId} onChange={setTriggerId} onAdded={addTrigger} title={title} />
+  );
   useEffect(() => {
     if (step !== "choose") return;
     const id = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
@@ -51,7 +62,7 @@ export default function CravingSOS() {
         );
       });
     }
-    try { await api.logCraving({ toolUsed: tool, outcome, ...coords }); } catch { /* non-blocking */ }
+    try { await api.logCraving({ toolUsed: tool, outcome, triggerId, ...coords }); } catch { /* non-blocking */ }
     navigate("/");
   };
 
@@ -92,7 +103,7 @@ export default function CravingSOS() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.7rem" }}>
             {TOOLS.map((t) => (
               <button key={t.key} className="card" onClick={() => start(t.key)}
-                style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: "0.5rem", background: "#fff", boxShadow: "var(--shadow-sm)", padding: "1rem" }}>
+                style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: "0.5rem", background: "#fff", color: "var(--text)", boxShadow: "var(--shadow-sm)", padding: "1rem" }}>
                 <span className="ico-chip" style={{ background: t.tint, color: t.color, width: 40, height: 40 }}><Icon name={t.icon} size={20} /></span>
                 <strong>{t.label}</strong>
                 <span className="muted" style={{ fontSize: "0.78rem", lineHeight: 1.3 }}>{t.desc}</span>
@@ -113,6 +124,10 @@ export default function CravingSOS() {
             Need a real person?{" "}
             <a href="#" onClick={(e) => { e.preventDefault(); navigate("/help"); }} style={{ color: "var(--danger)", fontWeight: 700 }}>Get help now</a>
           </p>
+
+          {/* the user's own triggers, and their plan for the one that's hitting
+              (below the help link, so that stays on the first screen) */}
+          {picker("What set this off?")}
         </div>
       </div>
     );
@@ -134,6 +149,7 @@ export default function CravingSOS() {
         <>
           <h1 className="h1">How did that go?</h1>
           <p className="muted">Be honest — no one's judging. It just helps you spot your patterns.</p>
+          <div style={{ marginTop: "0.5rem" }}>{picker("What set it off?")}</div>
           <div className="stack" style={{ marginTop: "1rem" }}>
             <button onClick={() => finishAndLog("passed")}>The craving passed</button>
             <button className="ghost" onClick={() => finishAndLog("held")}>Still tough, but I held on</button>

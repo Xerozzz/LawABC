@@ -3,21 +3,25 @@ import { api, getToken, setToken, clearToken } from "./api.js";
 
 const AuthContext = createContext(null);
 
+// Until the server says otherwise, switchable features stay off (fail closed).
+const DEFAULT_FEATURES = { community: false };
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [features, setFeatures] = useState(DEFAULT_FEATURES);
   const [loading, setLoading] = useState(true);
 
-  // On boot, if we have a token, load the profile.
+  // On boot, load which features are on and, if we have a token, the profile.
+  // Both finish before first render so the tabs don't flicker.
   useEffect(() => {
-    if (!getToken()) {
-      setLoading(false);
-      return;
-    }
-    api
-      .getProfile()
-      .then(setUser)
-      .catch(() => clearToken())
-      .finally(() => setLoading(false));
+    const config = api
+      .getConfig()
+      .then((c) => setFeatures({ ...DEFAULT_FEATURES, ...c.features }))
+      .catch(() => {});
+    const profile = getToken()
+      ? api.getProfile().then(setUser).catch(() => clearToken())
+      : null;
+    Promise.all([config, profile]).finally(() => setLoading(false));
   }, []);
 
   const handleAuth = async (fn) => {
@@ -30,6 +34,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    features,
     loading,
     setUser,
     login: (email, password) => handleAuth(() => api.login(email, password)),
