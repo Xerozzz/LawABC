@@ -1,31 +1,135 @@
 import { Router } from "express";
-import { timingSafeEqual } from "node:crypto";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { query } from "../db.js";
+import { JWT_SECRET } from "../auth.js";
+import { ADMIN_ACCOUNTS } from "../admins.js";
 import { getParticipation, getUserActivity, STUDY_TZ } from "../activity.js";
 
 const router = Router();
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
 
-// Shared-secret auth for the study team. Deliberately not tied to a user role:
-// there is no admin surface inside the app for a participant to stumble onto.
-// With ADMIN_TOKEN unset the whole router is disabled rather than open.
-function requireAdmin(req, res, next) {
-  if (!ADMIN_TOKEN) {
-    return res.status(503).json({ error: "Admin API disabled (set ADMIN_TOKEN)" });
+// Two ways in, neither tied to a participant account:
+//   - an admin account from admins.js, signed in on the /admin page;
+//   - the shared ADMIN_TOKEN, for scripts and curl (see STUDY.md).
+// With no accounts and no token the whole router is disabled rather than open.
+
+// Admin sessions are signed with a key derived from JWT_SECRET, so a
+// participant's token can never pass as an admin's, or the reverse.
+const SESSION_KEY = createHmac("sha256", JWT_SECRET).update("clearair-admin-session").digest();
+const SESSION_TTL = "12h";
+
+const findAccount = (username) => ADMIN_ACCOUNTS.find((a) => a.username === username);
+
+// Changes whenever the account's password does, which signs out old sessions.
+const passwordVersion = (account) =>
+  createHash("sha256").update(account.passwordHash).digest("hex").slice(0, 16);
+
+// The account behind a session token, if it's valid and the account still exists.
+function sessionAccount(token) {
+  if (!token) return null;
+  try {
+    const { sub, pwv } = jwt.verify(token, SESSION_KEY, { algorithms: ["HS256"] });
+    const account = findAccount(sub);
+    return account && passwordVersion(account) === pwv ? account : null;
+  } catch {
+    return null;
   }
-  const header = req.headers.authorization || "";
-  const supplied =
-    req.get("x-admin-token") || (header.startsWith("Bearer ") ? header.slice(7) : "");
+}
+
+// In production Caddy terminates TLS and reports it in X-Forwarded-Proto, so
+// req.secure is true only for https. Local dev runs on plain http.
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
+const insecure = (req) =>
+  process.env.NODE_ENV === "production" && !req.secure && !LOCAL_HOSTS.has(req.hostname);
+
+const safeEqual = (supplied, expected) => {
   const a = Buffer.from(supplied);
-  const b = Buffer.from(ADMIN_TOKEN);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) {
-    return res.status(401).json({ error: "Bad admin token" });
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+};
+
+// Failed sign-ins per IP, kept in memory (a restart clears them, which is fine
+// for one small server).
+const FAIL_LIMIT = 10;
+const FAIL_WINDOW_MS = 15 * 60 * 1000;
+const failures = new Map(); // ip -> { count, resetAt }
+
+function failuresFor(ip) {
+  const f = failures.get(ip);
+  if (f && f.resetAt <= Date.now()) {
+    failures.delete(ip);
+    return null;
   }
-  next();
+  return f;
+}
+
+function recordFailure(ip) {
+  const f = failuresFor(ip);
+  if (f) f.count++;
+  else failures.set(ip, { count: 1, resetAt: Date.now() + FAIL_WINDOW_MS });
+  if (failures.size > 1000) {
+    for (const [key, v] of failures) if (v.resetAt <= Date.now()) failures.delete(key);
+  }
+}
+
+// Compared against when the username doesn't exist, so a wrong username takes
+// as long as a wrong password and the response doesn't reveal which accounts exist.
+const DUMMY_HASH = bcrypt.hashSync("not-an-account", 12);
+
+router.post("/login", async (req, res) => {
+  if (insecure(req)) {
+    return res.status(403).json({ error: "Admin sign-in only works over https://" });
+  }
+  if ((failuresFor(req.ip)?.count || 0) >= FAIL_LIMIT) {
+    return res.status(429).json({ error: "Too many failed attempts. Try again in 15 minutes." });
+  }
+  const { username, password } = req.body || {};
+  if (typeof username !== "string" || typeof password !== "string" || !username || !password) {
+    return res.status(400).json({ error: "Username and password required" });
+  }
+  const account = findAccount(username.trim().toLowerCase());
+  const matches = await bcrypt.compare(password, account?.passwordHash || DUMMY_HASH);
+  if (!account || !matches) {
+    recordFailure(req.ip);
+    return res.status(401).json({ error: "Wrong username or password" });
+  }
+  failures.delete(req.ip);
+  const token = jwt.sign(
+    { sub: account.username, pwv: passwordVersion(account) },
+    SESSION_KEY,
+    { algorithm: "HS256", expiresIn: SESSION_TTL }
+  );
+  res.json({ token, username: account.username });
+});
+
+function requireAdmin(req, res, next) {
+  const header = req.headers.authorization || "";
+  const bearer = header.startsWith("Bearer ") ? header.slice(7) : "";
+
+  const account = sessionAccount(bearer);
+  if (account) {
+    if (insecure(req)) return res.status(403).json({ error: "Admin access only works over https://" });
+    req.admin = account.username;
+    return next();
+  }
+
+  if (!ADMIN_TOKEN && ADMIN_ACCOUNTS.length === 0) {
+    return res.status(503).json({ error: "Admin API disabled (set ADMIN_TOKEN or add an admin account)" });
+  }
+  const supplied = req.get("x-admin-token") || bearer;
+  if (ADMIN_TOKEN && safeEqual(supplied, ADMIN_TOKEN)) return next();
+  return res.status(401).json({ error: "Not signed in as an admin" });
 }
 
 router.use(requireAdmin);
+
+// Who's signed in, so the /admin page can check a stored session is still good.
+router.get("/me", (req, res) => {
+  res.json({ username: req.admin || null });
+});
 
 // Cohort participation: every user x every study day.
 router.get("/participation", async (_req, res) => {

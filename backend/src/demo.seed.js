@@ -4,6 +4,9 @@
 
 import { query } from "./db.js";
 
+// Owns the seed posts. Not a participant, so it's left out of the study data.
+export const DEMO_EMAIL = "demo-seed@clearair.local";
+
 const DEMO_REFLECTIONS = [
   { body: "Day 3 was the worst but it does get easier. Hang in there 💪", channel: "advice" },
   { body: "The breathing thing actually works when a craving hits, not gonna lie.", channel: "cravings" },
@@ -21,13 +24,14 @@ export async function seedDemoContent() {
   // A dedicated demo account owns the seed reflections (identity is never shown).
   const { rows } = await query(
     `INSERT INTO users (email, password_hash, onboarded)
-       VALUES ('demo-seed@clearair.local', 'x', TRUE)
+       VALUES ($1, 'x', TRUE)
      ON CONFLICT (email) DO NOTHING
-     RETURNING id`
+     RETURNING id`,
+    [DEMO_EMAIL]
   );
   let demoId = rows[0]?.id;
   if (!demoId) {
-    const found = await query("SELECT id FROM users WHERE email = 'demo-seed@clearair.local'");
+    const found = await query("SELECT id FROM users WHERE email = $1", [DEMO_EMAIL]);
     demoId = found.rows[0].id;
   }
 

@@ -8,6 +8,7 @@
 //   opened  — any signal at all, including a passive screen_view
 //   active  — at least one deliberate action (the study's "qualified day")
 import { query } from "./db.js";
+import { DEMO_EMAIL } from "./demo.seed.js";
 
 export const STUDY_TZ = process.env.STUDY_TZ || "Asia/Singapore";
 export const STUDY_DAYS = Number(process.env.STUDY_DAYS || 14);
@@ -146,8 +147,8 @@ export async function getParticipation() {
   const { rows: users } = await query(
     `SELECT id, email, nickname,
             to_char(COALESCE(consent_accepted_at, created_at) AT TIME ZONE $1, 'YYYY-MM-DD') AS joined
-       FROM users ORDER BY id`,
-    [STUDY_TZ]
+       FROM users WHERE email <> $2 ORDER BY id`,
+    [STUDY_TZ, DEMO_EMAIL]
   );
 
   const { rows: counts } = await query(

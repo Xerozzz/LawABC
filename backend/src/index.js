@@ -27,6 +27,10 @@ import { FEATURES } from "./features.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// In production Caddy is the one proxy in front of the app: trust it for the
+// client IP (admin sign-in limits) and whether the request came over https.
+app.set("trust proxy", 1);
+
 app.use(cors());
 app.use(express.json());
 

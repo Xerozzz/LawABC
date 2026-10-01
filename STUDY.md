@@ -43,7 +43,7 @@ the study data via `ON DELETE CASCADE`. Nothing to keep in sync.
 
 | Variable | Default | Notes |
 |----------|---------|-------|
-| `ADMIN_TOKEN` | *(unset)* | Shared secret for `/api/admin/*`. Unset ⇒ the API is disabled, not open. |
+| `ADMIN_TOKEN` | *(unset)* | Shared secret for `/api/admin/*` (scripts and curl). With it unset and no admin accounts, the API is disabled, not open. |
 | `STUDY_DAYS` | `14` | Length of each participant's window |
 | `STUDY_TZ` | `Asia/Singapore` | Timezone the days are cut on |
 | `STUDY_START_DATE` | *(unset)* | Fixed cohort start (`YYYY-MM-DD`). Unset ⇒ each participant's 14 days begin the day they accept consent. |
@@ -53,6 +53,25 @@ Terraform generates `ADMIN_TOKEN` automatically. Read it with:
 ```bash
 cd infra && terraform output -raw admin_token
 ```
+
+## The admin page
+
+`https://<your-app-host>/admin` shows the study team how the pilot is going:
+participants active each day, who's using the app regularly, who has gone quiet
+mid-study, each participant's 14-day grid and full activity log, and the payout
+CSV. It's read-only.
+
+- **Sign-in only.** Admin accounts live in `backend/src/admins.js` (username +
+  bcrypt hash), not in the users table, so nobody can create one from the app
+  and they never appear in the study data.
+- **Add someone or reset a password:** `node backend/scripts/new-admin.js <username>`,
+  then commit and push. The password is written to `~/ClearAir-admin-<username>.txt`
+  (never printed); move it to a password manager and delete the file.
+- **Remove someone:** delete their line in `admins.js` and push. They're signed
+  out on their next request.
+- **HTTPS only.** The page won't show the sign-in form over plain http, and the
+  server refuses admin sign-ins over http in production. Sessions last 12 hours
+  and end when the tab closes. 10 failed sign-ins from one IP lock it out for 15 minutes.
 
 ## Pulling the data
 
